@@ -1,10 +1,15 @@
 (ns always-agent-poc.core
+  #_(:require-macros
+   [devcards.core :as dc :refer [defcard deftest]])
   (:require [reagent.core :as reagent]
             [re-frame.core :as re-frame]
             [always-agent-poc.events :as events]
             [always-agent-poc.views :as views]
             [always-agent-poc.config :as config]))
 
+
+#_(defcard my-first-card
+  )
 
 (defn dev-setup []
   (when config/debug?
@@ -17,6 +22,6 @@
                   (.getElementById js/document "app")))
 
 (defn ^:export init []
-  (re-frame/dispatch-sync [::events/initialize-db])
+  (re-frame/dispatch-sync [:events/initialize-db])
   (dev-setup)
   (mount-root))
