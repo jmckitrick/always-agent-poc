@@ -50,39 +50,13 @@
 (defonce my-image (atom "http://loremflickr.com/200/200/human,face,closeup,man/all"))
 (defonce my-bg (atom "http://loremflickr.com/800/400/city,skyline/all"))
 
-(defcard gallery-image-card
-  "## Try reagent"
-  (dc/reagent views/gallery-image-component)
-  my-image
-  {:inspect-data true
-   :watch-atom true
-   :history true
-   :hidden true})
-
-(defcard-rg gallery-image-card-rg
-  "## Gallery image card with reagent"
-  views/gallery-image-component
-  my-image
-  {:inspect-data true
-   :history true
-   :hidden true})
-
-(defcard-rg gallery-image-card-rg2
-  "## Gallery image card with reagent alt"
-  [views/gallery-image-component my-image]
-  my-image
-  {:inspect-data true
-   :history true
-   :hidden true
-   })
-
-(defcard-rg agent-component-card-rg2
+(defcard-rg agent-component-card-rg
   "## Agent component"
   [views/agent-component my-bg my-image]
   my-bg
   {:inspect-data true
    :history true
-   :hidden true
+   ;;:hidden true
    })
 
 (defcard-rg profile-image-component-card
@@ -90,7 +64,7 @@
   [views/profile-image-component my-image]
   my-image
   {:inspect-data true
-   ;;:hidden true
+   :hidden true
    })
 
 (defonce my-deal (atom {:imageUrl @my-image :dealUrl "#"}))
@@ -100,7 +74,8 @@
   [views/deal-component @my-deal]
   my-deal
   {:inspect-data true
-   :hidden true})
+   ;;:hidden true
+   })
 
 (defn dev-setup []
   (when config/debug?

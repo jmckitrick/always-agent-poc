@@ -42,8 +42,18 @@
    {:on-click #(re-frame/dispatch [:events/deal-destinations])}
    "Click me D"])
 
-(defn profile-name-component [name]
-  [:div {:style {:font-style :italic
+(defn profile-image-component [src]
+  (when @src
+    [:div.profile-section {:style {:float :left}}
+     [:div.profile-image
+      {:style {:position :relative
+               :display :block
+               :width 181
+               :height 175
+               :border-radius "2px 2px 0 0"}}
+      [:img {:style {:max-width "100%"}
+             :src @src}]
+      [:div {:style {:font-style :italic
                  :position :absolute
                  :bottom 0
                  :box-sizing :border-box
@@ -51,30 +61,17 @@
                  :padding "5px 7px"
                  :color "#fff"
                  :background "rgba(57, 83, 108, 0.9)"}}
-   name])
+       "Your agent Tony Stark"]]]))
 
-(defn profile-image-component [src]
-  (when @src
-    [:div
-     [:img {:src @src
-            :style {:position :relative
-                    :display :block
-                    :width 181
-                    :height 175
-                    :border-radius "2px 2px 0 0"}}]
-     [profile-name-component "Your agent Tony"]]))
-
-(defn gallery-image-component [src]
-  (when @src
-    [:div
-     [:img {:src @src}]]))
-
-(defn deal-component [deal]
-  [:span {:style {:margin 2}}
-   [:a {:href (:dealUrl deal)}
-    [:img {:src (:imageUrl deal)
-           :width 350
-           :height 350}]]])
+(defn deal-component [{:keys [dealUrl imageUrl] :as deal}]
+  (let [url (if (re-find #"^http" imageUrl)
+              imageUrl
+              (str "http://thoragency.localhost" imageUrl))]
+    [:span {:style {:margin 2}}
+     [:a {:href dealUrl}
+      [:img {:src url
+             :width 350
+             :height 350}]]]))
 
 (defn deals-component []
   (when (seq @(re-frame/subscribe [:subs/deals]))
@@ -86,27 +83,18 @@
        (for [deal @(re-frame/subscribe [:subs/deals])]
          ^{:key (:cityId deal)}
          [deal-component deal]))]]))
-#_
-(defn bg-image-component [src]
-  [:div {:style {:background (str "url(" @gallery-pic ")")
-                 :position :relative
-                 :width 800
-                 :height 400
-                 :margin 10
-                 :background-position "center"
-                 :background-size "cover"
-                 :background-repeat "no-repeat"}}
-   [profile-image-component profile-pic]])
 
 (defn agent-component [gallery-pic profile-pic]
-  [:div {:style {:background (str "url(" @gallery-pic ")")
-                 :position :relative
-                 :width 800
-                 :height 400
-                 :margin 10
-                 :background-position "center"
-                 :background-size "cover"
-                 :background-repeat "no-repeat"}}
+  [:div.profile-row
+   {:style {:background (str "url(" @gallery-pic ")")
+            ;:position :relative
+            ;:width "100%"
+            :height 450
+            ;:margin 10
+            ;:background-position "center"
+            :background-size "cover"
+            ;:background-repeat "no-repeat"
+            }}
    [profile-image-component profile-pic]])
 
 (defn main-panel []
@@ -126,8 +114,7 @@
      [agent-component
       (re-frame/subscribe [:subs/gallery])
       (re-frame/subscribe [:subs/photo])]
-     #_[gallery-image-component (re-frame/subscribe [:subs/gallery])]
-     #_[deals-component]
+     [deals-component]
      #_[:div.row
       [:div.col-sm "Hello from " @name]
       [:div.col-sm "More content"]
