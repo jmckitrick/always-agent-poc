@@ -5,8 +5,10 @@
                  [re-frame "0.10.4"]
                  [day8.re-frame/http-fx "0.1.5"]
                  [cljs-ajax "0.7.3"]
-                 [sablono "0.7.4"]
-                 #_[devcards "0.2.4"]
+                 [devcards "0.2.4"]
+                 [sablono "0.8.3"]
+                 [cljsjs/react "16.2.0-3"]
+                 [cljsjs/react-dom "16.2.0-3"]
                  #_[org.webjars/bootstrap "4.0.0"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
@@ -43,7 +45,7 @@
                     :preloads             [devtools.preload]
                     :external-config      {:devtools/config {:features-to-install :all}}
                     }}
-    #_{:id           "devcards"
+    {:id           "devcards"
      :source-paths ["src/cljs"]
      :figwheel     {;;:on-jsload "always-agent-poc.core/mount-root"
                     :devcards true}
