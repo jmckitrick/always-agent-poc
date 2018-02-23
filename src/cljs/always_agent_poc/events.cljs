@@ -127,3 +127,9 @@
  :subs/deals
  (fn [db]
    (get-in db [:deals :destinations])))
+
+(re-frame/reg-event-db
+ :events/edit-me
+ (fn [db]
+   (js/console.log "Edit!")
+   db))

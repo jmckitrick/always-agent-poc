@@ -47,10 +47,10 @@
    :history true})
 
 ;;(defonce my-image (atom "https://clojure.org/images/clojure-logo-120b.png"))
-(defonce my-image (atom "http://loremflickr.com/200/200/human,face,closeup,man/all"))
-(defonce my-bg (atom "http://loremflickr.com/800/400/city,skyline/all"))
+(defonce my-image (atom "http://loremflickr.com/200/200/face,closeup/all"))
+(defonce my-bg (atom "http://loremflickr.com/800/400/travel/all"))
 
-(defcard-rg agent-component-card-rg
+(defcard-rg agent-component-card
   "## Agent component"
   [views/agent-component my-bg my-image]
   my-bg
@@ -59,13 +59,10 @@
    ;;:hidden true
    })
 
-(defcard-rg profile-image-component-card
-  "## Profile image"
-  [views/profile-image-component my-image]
-  my-image
-  {:inspect-data true
-   :hidden true
-   })
+(defcard-rg bio-component-card
+  "## Bio component"
+  [views/bio-component]
+  {})
 
 (defonce my-deal (atom {:imageUrl @my-image :dealUrl "#"}))
 
