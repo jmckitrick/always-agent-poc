@@ -42,6 +42,50 @@
    {:on-click #(re-frame/dispatch [:events/deal-destinations])}
    "Click me D"])
 
+(defn toggle-edit [a]
+  (js/console.log "Toggle was" @a)
+  (swap! a not)
+  (js/console.log "Toggle is" @a)
+  (re-frame/dispatch [:events/edit-me 88]))
+
+(defn show-edit-component [style]
+  (fn [style]
+    (js/console.log "EDIT")
+    [:i.fas.fa-edit style]))
+
+(defn show-save-component [style]
+  (fn [style]
+    (js/console.log "SAVE")
+    [:i.far.fa-save style]))
+
+(defn edit-icon-component [top right size target]
+  (let [edit (reagent/atom false)]
+    (fn [top right size target]
+      (let [style {:style
+                   {:position :absolute
+                    :top top
+                    :right right}}]
+        [:div {:style {:font-size (if (= size :medium) "2em" "3em")
+                       :color :blue}
+               :on-click #(toggle-edit edit)}
+         (if @edit
+           (js/console.log "TRUE")
+           (js/console.log "FALSE"))
+         #_(if (first @(re-frame/subscribe [:subs/edit-target]))
+           (js/console.log "TRUE??")
+           (js/console.log "FALSE??"))
+         #_(if @edit
+           [:i.far.fa-save style]
+           [:i.fas.fa-edit style])
+         #_(if (first @(re-frame/subscribe [:subs/edit-target]))
+           [:i.far.fa-save style]
+           [:i.fas.fa-edit style])
+         #_[:i.far.fa-save (assoc-in style [:style :visibility] (if @edit "visible" "hidden"))]
+         #_[:i.fas.fa-edit (assoc-in style [:style :visibility] (if @edit "hidden" "visible"))]
+         #_(if (first @(re-frame/subscribe [:subs/edit-target]))
+           [show-save-component style]
+           [show-edit-component style])]))))
+
 (defn profile-image-component [src]
   (when @src
     [:div.profile-section {:style {:float :left}}
@@ -53,11 +97,7 @@
                :border-radius "2px 2px 0 0"}}
       [:img {:style {:max-width "100%"}
              :src @src}]
-      [:div {:style {:font-size "3em" :color :blue}
-             :on-click #(re-frame/dispatch [:events/edit-me])}
-       [:i.fas.fa-edit {:style {:position :absolute
-                                :bottom "85%"
-                                :right -20}}]]
+      [edit-icon-component -20 -20 :medium :profile]
       [:div {:style {:font-style :italic
                      :position :absolute
                      :bottom 0
@@ -67,11 +107,7 @@
                      :color "#fff"
                      :background "rgba(57, 83, 108, 0.9)"}}
        "Your agent Tony Stark"
-       [:div {:style {:font-size "2em" :color :blue}}
-        [:i.fas.fa-edit {:style {:position :absolute
-                                 :bottom "50%"
-                                 :right -20
-                                 }}]]]]]))
+       [edit-icon-component -20 -20 :medium :name]]]]))
 
 (defn deal-component [{:keys [dealUrl imageUrl] :as deal}]
   (let [url (if (re-find #"^http" imageUrl)
@@ -105,7 +141,8 @@
             :background-size "cover"
             ;:background-repeat "no-repeat"
             }}
-   [:i.fas.fa-edit {:style {:position :absolute
+   [edit-icon-component -30 -30 :large :gallery]
+   #_[:i.fas.fa-edit {:style {:position :absolute
                             ;;:position :relative
                             ;:float :right
                             ;;:top "5%";"85%"

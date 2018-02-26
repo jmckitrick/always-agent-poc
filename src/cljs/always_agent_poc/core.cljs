@@ -74,6 +74,10 @@
    ;;:hidden true
    })
 
+(defcard-rg edit-icon-component-card
+  "## Edit icon component"
+  [views/edit-icon-component -20 -20 1 false])
+
 (defn dev-setup []
   (when config/debug?
     (enable-console-print!)

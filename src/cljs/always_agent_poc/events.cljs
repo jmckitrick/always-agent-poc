@@ -130,6 +130,11 @@
 
 (re-frame/reg-event-db
  :events/edit-me
+ (fn [db [_ target]]
+   (js/console.log "Edit" target)
+   (assoc db :edit (not (:edit db)) :target target)))
+
+(re-frame/reg-sub
+ :subs/edit-target
  (fn [db]
-   (js/console.log "Edit!")
-   db))
+   [(:edit db) (:target db)]))
