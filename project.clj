@@ -12,7 +12,8 @@
                  #_[org.webjars/bootstrap "4.0.0"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
-            [lein-ancient "0.6.15"]]
+            [lein-ancient "0.6.15"]
+            [lein-externs "0.1.6"]]
 
   :min-lein-version "2.5.3"
 
@@ -44,6 +45,11 @@
                     :source-map-timestamp true
                     :preloads             [devtools.preload]
                     :external-config      {:devtools/config {:features-to-install :all}}
+                    ;;:infer-externs true
+                    :externs ["externs.js"]
+                    :foreign-libs [{:file "./image-gallery.js" :provides ["ImageGallery"]}
+                                   #_{:file "./avatar-editor.js" :provides ["AvatarEditor"]}
+                                   #_{:file "./avatar-editor2.js" :provides ["AvatarEditor2"]}]
                     }}
     {:id           "devcards"
      :source-paths ["src/cljs"]

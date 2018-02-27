@@ -10,45 +10,10 @@
             [sablono.core :as sab]
             [devcards.core]))
 
-(def my-atom (atom [1 2 3]))
-#_
-(defcard my-first-card
-  (sab/html [:h1 "Devcards!"]))
-#_
-(deftest my-first-test
-  "## Here is a test"
-  (cljs.test/testing "context 1"
-    (cljs.test/is (= 0 0))
-    (cljs.test/is (= 1 1))
-    (cljs.test/is (= 1 2))
-    (cljs.test/is (= 2 2))))
-#_
-(defcard my-next-card
-  "## Here is some markdown."
-  @my-atom)
-#_
-(defcard another-card
-  "## Try reagent"
-  (dc/reagent views/button-component))
-#_
-(defcard another-card-1
-  "## Try reagent"
-  (dc/reagent views/button-component-0))
-#_
-(defcard another-card-2
-  "## Try reagent"
-  (dc/reagent views/my-data-component))
-#_
-(defcard-rg another-card-rg
-  "## Try reagent"
-  views/my-data-component
-  nil
-  {:inspect-data true
-   :history true})
-
-;;(defonce my-image (atom "https://clojure.org/images/clojure-logo-120b.png"))
+#_(defonce my-image (atom "https://clojure.org/images/clojure-logo-120b.png"))
 (defonce my-image (atom "http://loremflickr.com/200/200/face,closeup/all"))
 (defonce my-bg (atom "http://loremflickr.com/800/400/travel/all"))
+(defonce my-bg2 (atom "http://loremflickr.com/350/350/travel/all"))
 
 (defcard-rg agent-component-card
   "## Agent component"
@@ -64,7 +29,7 @@
   [views/bio-component]
   {})
 
-(defonce my-deal (atom {:imageUrl @my-image :dealUrl "#"}))
+(defonce my-deal (atom {:imageUrl @my-bg2 :dealUrl "#"}))
 
 (defcard-rg deal-component-card
   "## Deal component"
@@ -74,9 +39,9 @@
    ;;:hidden true
    })
 
-(defcard-rg edit-icon-component-card
-  "## Edit icon component"
-  [views/edit-icon-component -20 -20 1 false])
+(defcard-rg edit-text-card
+  "## Edit text"
+  [views/edit-text-component])
 
 (defn dev-setup []
   (when config/debug?

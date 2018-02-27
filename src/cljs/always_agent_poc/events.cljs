@@ -138,3 +138,13 @@
  :subs/edit-target
  (fn [db]
    [(:edit db) (:target db)]))
+
+(re-frame/reg-event-db
+ :events/update-name
+ (fn [db [_ name]]
+   (assoc db :name name)))
+
+(re-frame/reg-sub
+ :subs/name
+ (fn [db]
+   (:name db)))
