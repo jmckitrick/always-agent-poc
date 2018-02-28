@@ -325,7 +325,6 @@
 (defn main-panel []
   [:div.container
    [:div
-    [my-data-component]
     [:div
      [button-component-0]]
     [:div
@@ -343,4 +342,6 @@
    #_[bio-component {}]
    #_[deals-component]
    [avatar-editor-ex]
-   #_[image-gallery-ex]])
+   #_[image-gallery-ex]
+   [:div
+    [my-data-component]]])
