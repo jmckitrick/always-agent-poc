@@ -245,18 +245,51 @@
       [edit-icon-component 0 100 :medium :tagline]]]
     [:p "Here is my bio with a bunch of details"]]])
 
-(def gallery-adapter (reagent/adapt-react-class "react-image-gallery"))
-(def gallery-adapted (reagent/adapt-react-class "ImageGallery"))
+(defn handle-file-change [e]
+  (let [reader (js/FileReader.)
+        file (aget (.-files (.-target e)) 0)]
+    (js/console.log "Reader:" reader)
+    (js/console.log "e:" e)
+    (js/console.log "e.target:" (.-target e))
+    (js/console.log "Files:" (.-files (.-target e)))
+    (js/console.log "File:" (aget (.-files (.-target e)) 0))
+    #_(set! (.-onload reader) #(js/console.log "Got file" e))
+    #_(set! (.-onload reader) #(js/console.log "Got file" (.-target e)))
+    (set! (.-onerror reader) #(js/console.log "Got file error" (.-target %)))
+    #_(set! (.-onload reader) #(js/console.log "Got file" (.-result (.-target %))))
+    (set! (.-onload reader) #(re-frame/dispatch [:events/file-url (.-result (.-target %))]))
+    (js/console.log "Reader:" reader)
+    (js/console.log "Reader onload:" (.-onload reader))
+    (js/console.log "Reader onerror:" (.-onerror reader))
+    (.readAsDataURL reader file)))
 
-(defn experimental-stuff []
-  (let [;;avatar-editor (aget js/window "deps" "react-avatar-editor")
-        avatar-editor (g/get js/window "ReactAvatarEditor")
-        ;;image-gallery (aget js/window "deps" "react-image-gallery")
-        image-gallery (g/get js/window "ReactImageGallery")
-        ]
-    [:div
-     "Editor"
-     [:> avatar-editor {:image "http://loremflickr.com/200/200/face,closeup/all"
+(defn avatar-editor-ex []
+  (let [avatar-editor (g/get js/window "ReactAvatarEditor")]
+    [:div {:style {:position :relative
+                   :border "1px solid black"
+                   :height 200
+                   :width 200
+                   }}
+     [:span.fas.fa-camera {:style {:padding 10
+                                   :font-size "3em"
+                                   :color "#CCC"
+                                   :position :absolute
+                                   :top 0
+                                   :right 0
+                                   :width 65
+                                   :height 55}}]
+     [:input {:type :file :accept "image/*"
+              :style {:position :absolute
+                      :top 0
+                      :right 0
+                      :width 65
+                      :height 55
+                      :opacity 0.1
+                      }
+              :on-change #(handle-file-change %)}]
+     [:> avatar-editor {:image (or @(re-frame/subscribe [:subs/file-data])
+                                   @(re-frame/subscribe [:subs/photo])
+                                   "http://loremflickr.com/200/200/face,closeup/all")
                         :width 200
                         :height 200
                         :border 50
@@ -265,48 +298,49 @@
                         :rotate 0
                         :onImageReady #(js/console.log "Ready!")
                         :onMouseUp #(js/console.log "Mouse up")
-                        }]
-     "Gallery 0"
-     [:> (.-default image-gallery) {:items [{:original "http://lorempixel.com/1000/600/nature/1/"
-                                             :thumbnail "http://lorempixel.com/250/150/nature/1/"}
-                                            {:original "http://lorempixel.com/1000/600/nature/2/"
-                                             :thumbnail "http://lorempixel.com/250/150/nature/2/"}
-                                            {:original "http://lorempixel.com/1000/600/nature/3/"
-                                             :thumbnail "http://lorempixel.com/250/150/nature/3/"}]
-                                    :renderItem #()
-                                    :showFullscreenButton false
-                                    :showPlayButton false}]
-     #_"Gallery 1"
-     #_[gallery-1]
-     #_[gallery-adapter {}]
-     #_"Gallery 2"
-     #_[gallery-adapted {}]
-     #_(react/createElement "react-image-gallery")
-     #_(react/createElement "react-avatar-editor")]))
+                        }]]))
+
+(defn image-gallery []
+  (let [image-gallery (g/get js/window "ReactImageGallery")]
+    (js/console.log "Loading???" @(re-frame.subs/subscribe [:subs/gallery-loading?]))
+    [:div
+     (if (or @(re-frame.subs/subscribe [:subs/gallery-loading?])
+              (empty? @(re-frame.subs/subscribe [:subs/gallery-data])))
+       [:i.far.far-spinner.far-spin.far-2x]
+       [:> (.-default image-gallery) {:items @(re-frame.subs/subscribe [:subs/gallery-data])
+                                      ;;:renderItem #()
+                                      :showFullscreenButton false
+                                      :showPlayButton false}])]))
+
+(defn image-gallery-ex []
+  (reagent/create-class
+   {:reagent-render
+    (fn []
+      [image-gallery])
+    :component-did-mount
+    (fn []
+      (js/console.log "Gallery mounted!")
+      (re-frame/dispatch [:events/load-gallery-data]))}))
 
 (defn main-panel []
-  (let [name (re-frame/subscribe [:subs/name])]
-    [:div.container
-     [my-data-component]
-     [:div
-      [button-component-0]]
-     [:div
-      [button-component]]
-     [:div
-      [button-component-2]]
-     [:div
-      [button-component-3]]
-     [:div
-      [button-component-4]]
-     [:br]
-     #_[agent-component
+  [:div.container
+   [:div
+    [my-data-component]
+    [:div
+     [button-component-0]]
+    [:div
+     [button-component]]
+    [:div
+     [button-component-2]]
+    [:div
+     [button-component-3]]
+    [:div
+     [button-component-4]]
+      [:br]]
+   #_[agent-component
       (re-frame/subscribe [:subs/gallery])
       (re-frame/subscribe [:subs/photo])]
-     #_[bio-component {}]
-     #_[deals-component]
-     #_[:div.row
-      [:div.col-sm "Hello from " @name]
-      [:div.col-sm "More content"]
-      [:div.col-sm "Still more content"]
-        [:div#my-id.col-sm {:style {:color :red}} "Still more content"]]
-     [experimental-stuff]]))
+   #_[bio-component {}]
+   #_[deals-component]
+   [avatar-editor-ex]
+   #_[image-gallery-ex]])

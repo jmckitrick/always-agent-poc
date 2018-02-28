@@ -119,7 +119,7 @@
     :http-xhrio {:method :get
                  :uri "http://thoragency.localhost/web-services/subsite-deals"
                  :timeout 8000
-                 :response-format (ajax/json-response-format {:keywords? :true})
+                 :response-format (ajax/json-response-format {:keywords? true})
                  :on-success [:events/good-deals]
                  :on-failure [:events/bad-ajax]}}))
 
@@ -148,3 +148,45 @@
  :subs/name
  (fn [db]
    (:name db)))
+
+(re-frame/reg-event-fx
+ :events/load-gallery-data
+ (fn [{:keys [db]} _]
+   (js/console.log "Get gallery data...")
+   {:db (assoc db :gallery-loading? true)
+    :http-xhrio {:method :get
+                 :uri "http://thoragency.localhost/admin/rest/profile/gallery"
+                 ;;:with-credentials true
+                 :timeout 10000
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [:events/good-gallery]
+                 :on-failure [:events/bad-ajax]}}))
+
+(re-frame/reg-event-db
+ :events/good-gallery
+ (fn [db [_ data]]
+   (js/console.log "Got gallery" data)
+   (assoc db :gallery data :gallery-loading? false)))
+
+(re-frame/reg-sub
+ :subs/gallery-loading?
+ (fn [db]
+   (js/console.log "Sub gallery loading?")
+   (:gallery-loading? db)))
+
+(re-frame/reg-sub
+ :subs/gallery-data
+ (fn [db]
+   (js/console.log "Sub gallery data")
+   (:gallery db)))
+
+(re-frame/reg-event-db
+ :events/file-url
+ (fn [db [_ data]]
+   (assoc db :file-data data)))
+
+(re-frame/reg-sub
+ :subs/file-data
+ (fn [db]
+   (js/console.log "File data" (:file-data db))
+   (:file-data db)))
