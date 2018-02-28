@@ -5,23 +5,16 @@
             [re-frame.core :as re-frame]
             [always-agent-poc.events :as events]
             [always-agent-poc.subs :as subs]
-            [ImageGallery]
+            #_[ImageGallery]
             #_[AvatarEditor]
-            #_[AvatarEditor2]))
-
+            #_[AvatarEditor2]
+            [webpack.bundle]
+            #_[react-image-gallery :as gallery-1]
+            #_[react-avatar-editor :as editor-1]
+            #_["react-avatar-editor" :as editor-2]
+            #_["react-image-gallery" :as gallery-2]))
 
 (defonce edit (reagent/atom false))
-
-(defn gallery-component []
-  (let [gallery js/ImageGallery]
-    (js/console.log gallery)
-    (js/console.log js/ImageGallery)
-    #_(.play gallery)))
-
-(defn editor-component []
-  (let [editor (js/AvatarEditor)]
-    (js/console.log editor)
-    #_(.getImageScaledToCanvas editor)))
 
 (defn my-data-component []
   [:div
@@ -58,16 +51,6 @@
   [:button
    {:on-click #(re-frame/dispatch [:events/deal-destinations])}
    "Click me D"])
-
-(defn button-component-5 []
-  [:button
-   {:on-click #(gallery-component)}
-   "Click me E"])
-
-(defn button-component-6 []
-  [:button
-   {:on-click #(editor-component)}
-   "Click me F"])
 
 (defn toggle-edit [a target]
   (swap! a not)
@@ -261,6 +244,38 @@
       [edit-icon-component 0 100 :medium :tagline]]]
     [:p "Here is my bio with a bunch of details"]]])
 
+(def gallery-adapter (reagent/adapt-react-class "react-image-gallery"))
+(def gallery-adapted (reagent/adapt-react-class "ImageGallery"))
+
+(defn experimental-stuff []
+  (let [avatar-editor (aget js/window "deps" "react-avatar-editor")
+        image-gallery (aget js/window "deps" "react-image-gallery")]
+    [:div
+     "Editor"
+     [:> avatar-editor {:image "http://loremflickr.com/200/200/face,closeup/all"
+                        :width 200
+                        :height 200
+                        :border 50
+                        :color [255 255 255 0.6]
+                        :scale 1
+                        :rotate 0
+                        :onImageReady #(js/console.log "Ready!")
+                        }]
+     "Gallery 0"
+     [:> (.-default image-gallery) {:items [{:original "http://lorempixel.com/1000/600/nature/1/"
+                                             :thumbnail "http://lorempixel.com/250/150/nature/1/"}
+                                            {:original "http://lorempixel.com/1000/600/nature/2/"
+                                             :thumbnail "http://lorempixel.com/250/150/nature/2/"}
+                                            {:original "http://lorempixel.com/1000/600/nature/3/"
+                                             :thumbnail "http://lorempixel.com/250/150/nature/3/"}]}]
+     #_"Gallery 1"
+     #_[gallery-1]
+     #_[gallery-adapter {}]
+     #_"Gallery 2"
+     #_[gallery-adapted {}]
+     #_(react/createElement "react-image-gallery")
+     #_(react/createElement "react-avatar-editor")]))
+
 (defn main-panel []
   (let [name (re-frame/subscribe [:subs/name])]
     [:div.container
@@ -275,20 +290,15 @@
       [button-component-3]]
      [:div
       [button-component-4]]
-     [:div
-      [button-component-5]]
-     [:div
-      [button-component-6]]
      [:br]
-     [agent-component
+     #_[agent-component
       (re-frame/subscribe [:subs/gallery])
       (re-frame/subscribe [:subs/photo])]
-     [bio-component {}]
-     [deals-component]
-     #_[gallery-component]
-     #_[editor-component]
+     #_[bio-component {}]
+     #_[deals-component]
      #_[:div.row
       [:div.col-sm "Hello from " @name]
       [:div.col-sm "More content"]
       [:div.col-sm "Still more content"]
-      [:div#my-id.col-sm {:style {:color :red}} "Still more content"]]]))
+        [:div#my-id.col-sm {:style {:color :red}} "Still more content"]]
+     [experimental-stuff]]))

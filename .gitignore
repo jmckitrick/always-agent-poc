@@ -4,3 +4,4 @@
 /resources/public/js/compiled
 out
 .cljs_rhino_repl
+node_modules

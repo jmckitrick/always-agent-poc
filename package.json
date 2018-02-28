@@ -1,0 +1,17 @@
+{
+  "name": "always-agent-poc",
+  "version": "0.0.1",
+  "author": "jmckitrick@gmail.com",
+  "scripts": {
+    "watch": "webpack -d --watch",
+    "build": "webpack -p"
+  },
+  "dependencies": {
+    "@cljs-oss/module-deps": "^1.1.1",
+    "react": "^15.5.4",
+    "react-avatar-editor": "^10.3.0",
+    "react-dom": "^15.5.4",
+    "react-image-gallery": "^0.8.7",
+    "webpack": "3.11.0"
+  }
+}

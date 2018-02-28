@@ -1,14 +1,14 @@
 (defproject always-agent-poc "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
-                 [reagent "0.7.0"]
+                 [reagent "0.7.0" :exclusions [cljsjs/react cljsjs/react-dom]]
                  [re-frame "0.10.4"]
                  [day8.re-frame/http-fx "0.1.5"]
                  [cljs-ajax "0.7.3"]
                  [devcards "0.2.4"]
                  [sablono "0.8.3"]
-                 [cljsjs/react "16.2.0-3"]
-                 [cljsjs/react-dom "16.2.0-3"]
+                 #_[cljsjs/react "16.2.0-3"]
+                 #_[cljsjs/react-dom "16.2.0-3"]
                  #_[org.webjars/bootstrap "4.0.0"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
@@ -46,10 +46,15 @@
                     :preloads             [devtools.preload]
                     :external-config      {:devtools/config {:features-to-install :all}}
                     ;;:infer-externs true
-                    :externs ["externs.js"]
-                    :foreign-libs [{:file "./image-gallery.js" :provides ["ImageGallery"]}
+                    ;; :externs ["externs.js"]
+                    :foreign-libs [{:file "public/js/bundle.js" :provides ["cljsjs.react" "cljsjs.react.dom" "webpack.bundle"]}
                                    #_{:file "./avatar-editor.js" :provides ["AvatarEditor"]}
                                    #_{:file "./avatar-editor2.js" :provides ["AvatarEditor2"]}]
+                    :install-deps true
+                    :npm-deps {:react "15.5.4"
+                               :react-dom "15.5.4"
+                               :react-avatar-editor "10.3.0"
+                               :react-image-gallery "^0.8.3"}
                     }}
     {:id           "devcards"
      :source-paths ["src/cljs"]
