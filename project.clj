@@ -1,7 +1,7 @@
 (defproject always-agent-poc "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
-                 [reagent "0.7.0" :exclusions [cljsjs/react cljsjs/react-dom]]
+                 [reagent "0.7.0"]
                  [re-frame "0.10.4"]
                  [day8.re-frame/http-fx "0.1.5"]
                  [cljs-ajax "0.7.3"]
@@ -11,11 +11,13 @@
                  #_[cljsjs/react-dom "16.2.0-3"]
                  #_[org.webjars/bootstrap "4.0.0"]]
 
+  :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]
+
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-ancient "0.6.15"]
             [lein-externs "0.1.6"]]
 
-  :min-lein-version "2.5.3"
+  :min-lein-version "2.7.1"
 
   :source-paths ["src/clj"]
 
@@ -36,7 +38,7 @@
   :cljsbuild
   {:builds
    [{:id           "dev"
-     :source-paths ["src/cljs"]
+     :source-paths ["src/cljs" "src"]
      :figwheel     {:on-jsload "always-agent-poc.core/mount-root"}
      :compiler     {:main                 always-agent-poc.core
                     :output-to            "resources/public/js/compiled/app.js"
@@ -47,14 +49,14 @@
                     :external-config      {:devtools/config {:features-to-install :all}}
                     ;;:infer-externs true
                     ;; :externs ["externs.js"]
-                    :foreign-libs [{:file "public/js/bundle.js" :provides ["cljsjs.react" "cljsjs.react.dom" "webpack.bundle"]}
-                                   #_{:file "./avatar-editor.js" :provides ["AvatarEditor"]}
-                                   #_{:file "./avatar-editor2.js" :provides ["AvatarEditor2"]}]
-                    :install-deps true
-                    :npm-deps {:react "15.5.4"
-                               :react-dom "15.5.4"
-                               :react-avatar-editor "10.3.0"
-                               :react-image-gallery "^0.8.3"}
+                    ;; :foreign-libs [{:file "public/js/bundle.js" :provides ["cljsjs.react" "cljsjs.react.dom" "webpack.bundle"]}
+                    ;;                #_{:file "./avatar-editor.js" :provides ["AvatarEditor"]}
+                    ;;                #_{:file "./avatar-editor2.js" :provides ["AvatarEditor2"]}]
+                    ;; :install-deps true
+                    ;; :npm-deps {:react "15.5.4"
+                    ;;            :react-dom "15.5.4"
+                    ;;            :react-avatar-editor "10.3.0"
+                    ;;            :react-image-gallery "^0.8.3"}
                     }}
     {:id           "devcards"
      :source-paths ["src/cljs"]

@@ -5,10 +5,11 @@
             [re-frame.core :as re-frame]
             [always-agent-poc.events :as events]
             [always-agent-poc.subs :as subs]
+            [goog.object :as g]
             #_[ImageGallery]
             #_[AvatarEditor]
             #_[AvatarEditor2]
-            [webpack.bundle]
+            #_[webpack.bundle]
             #_[react-image-gallery :as gallery-1]
             #_[react-avatar-editor :as editor-1]
             #_["react-avatar-editor" :as editor-2]
@@ -248,8 +249,11 @@
 (def gallery-adapted (reagent/adapt-react-class "ImageGallery"))
 
 (defn experimental-stuff []
-  (let [avatar-editor (aget js/window "deps" "react-avatar-editor")
-        image-gallery (aget js/window "deps" "react-image-gallery")]
+  (let [;;avatar-editor (aget js/window "deps" "react-avatar-editor")
+        avatar-editor (g/get js/window "ReactAvatarEditor")
+        ;;image-gallery (aget js/window "deps" "react-image-gallery")
+        image-gallery (g/get js/window "ReactImageGallery")
+        ]
     [:div
      "Editor"
      [:> avatar-editor {:image "http://loremflickr.com/200/200/face,closeup/all"
@@ -260,6 +264,7 @@
                         :scale 1
                         :rotate 0
                         :onImageReady #(js/console.log "Ready!")
+                        :onMouseUp #(js/console.log "Mouse up")
                         }]
      "Gallery 0"
      [:> (.-default image-gallery) {:items [{:original "http://lorempixel.com/1000/600/nature/1/"
@@ -267,7 +272,10 @@
                                             {:original "http://lorempixel.com/1000/600/nature/2/"
                                              :thumbnail "http://lorempixel.com/250/150/nature/2/"}
                                             {:original "http://lorempixel.com/1000/600/nature/3/"
-                                             :thumbnail "http://lorempixel.com/250/150/nature/3/"}]}]
+                                             :thumbnail "http://lorempixel.com/250/150/nature/3/"}]
+                                    :renderItem #()
+                                    :showFullscreenButton false
+                                    :showPlayButton false}]
      #_"Gallery 1"
      #_[gallery-1]
      #_[gallery-adapter {}]
