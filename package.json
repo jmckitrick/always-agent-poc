@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "react": "^15.5.4",
-    "react-avatar-editor": "^10.3.0",
     "react-dom": "^15.5.4",
+    "react-avatar-editor": "^10.3.0",
     "react-image-gallery": "^0.8.7"
   }
 }

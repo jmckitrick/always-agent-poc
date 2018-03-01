@@ -2,7 +2,7 @@
   (:require-macros
    [devcards.core :as dc :refer [defcard deftest]])
   (:require [reagent.core :as reagent]
-            [re-frame.core :as re-frame]
+            [re-frame.core :as rf]
             [always-agent-poc.events :as events]
             [always-agent-poc.subs :as subs]
             [goog.object :as g]
@@ -20,42 +20,42 @@
 (defn my-data-component []
   [:div
    [:div
-    (pr-str @(re-frame.subs/subscribe [:subs/db]))]
+    (pr-str @(rf/subscribe [:subs/db]))]
    [:div
-    (pr-str @(re-frame.subs/subscribe [:subs/my-data]))]
+    (pr-str @(rf/subscribe [:subs/my-data]))]
    [:div
-    (pr-str @(re-frame.subs/subscribe [:subs/ajax-data]))]
+    (pr-str @(rf/subscribe [:subs/ajax-data]))]
    [:div
-    (pr-str @(re-frame.subs/subscribe [:subs/ajax-data-tst]))]])
+    (pr-str @(rf/subscribe [:subs/ajax-data-tst]))]])
 
 (defn button-component-0 []
   [:button
-   {:on-click #(re-frame/dispatch [:events/initialize-db])}
+   {:on-click #(rf/dispatch [:events/initialize-db])}
    "Click me 0"])
 
 (defn button-component []
   [:button
-   {:on-click #(re-frame/dispatch [:events/my-event-1 99])}
+   {:on-click #(rf/dispatch [:events/my-event-1 99])}
    "Click me A"])
 
 (defn button-component-2 []
   [:button
-   {:on-click #(re-frame/dispatch [:events/ajax])}
+   {:on-click #(rf/dispatch [:events/ajax])}
    "Click me B"])
 
 (defn button-component-3 []
   [:button
-   {:on-click #(re-frame/dispatch [:events/ajax-tst])}
+   {:on-click #(rf/dispatch [:events/ajax-tst])}
    "Click me C"])
 
 (defn button-component-4 []
   [:button
-   {:on-click #(re-frame/dispatch [:events/deal-destinations])}
+   {:on-click #(rf/dispatch [:events/deal-destinations])}
    "Click me D"])
 
 (defn toggle-edit [a target]
   (swap! a not)
-  (re-frame/dispatch [:events/edit-me target]))
+  (rf/dispatch [:events/edit-me target]))
 
 (defn edit-icon-component [top right size target]
   (let [edit? (reagent/atom false)]
@@ -74,10 +74,10 @@
 (defn update-text [txt el]
   (let [name (-> el .-target .-value)]
     (reset! txt name)
-    (re-frame/dispatch [:events/update-name name])))
+    (rf/dispatch [:events/update-name name])))
 
 (defn edit-text-component []
-  (let [txt (reagent/atom @(re-frame/subscribe [:subs/name]))]
+  (let [txt (reagent/atom @(rf/subscribe [:subs/name]))]
     (fn []
       [:input
        {:type :text
@@ -95,7 +95,7 @@
                :height 175
                ;:border-radius "2px 2px 2px 2px"
                }}
-      (let [[edit? target] @(re-frame/subscribe [:subs/edit-target])]
+      (let [[edit? target] @(rf/subscribe [:subs/edit-target])]
         [:img {:style {:max-width "100%"
                        :box-sizing :border-box
                        :border (if (and edit? (= :profile target))
@@ -110,7 +110,7 @@
                      :padding "5px 7px"
                      :color "#fff"
                      :background "rgba(57, 83, 108, 0.9)"}}
-       (let [[edit target] @(re-frame/subscribe [:subs/edit-target])]
+       (let [[edit target] @(rf/subscribe [:subs/edit-target])]
          (if (and
               (= true edit)
               (= :name target))
@@ -129,18 +129,18 @@
              :height 350}]]]))
 
 (defn deals-component []
-  (when (seq @(re-frame/subscribe [:subs/deals]))
+  (when (seq @(rf/subscribe [:subs/deals]))
     [:div {:style {:clear :both :margin 20}}
      [:h2 "Featured Destinations"]
      [:h5 "Check out the following"]
      [:div.row-fluid
       (doall
-       (for [deal @(re-frame/subscribe [:subs/deals])]
+       (for [deal @(rf/subscribe [:subs/deals])]
          ^{:key (:cityId deal)}
          [deal-component deal]))]]))
 
 (defn agent-component [gallery-pic profile-pic]
-  (let [[edit? target] @(re-frame/subscribe [:subs/edit-target])]
+  (let [[edit? target] @(rf/subscribe [:subs/edit-target])]
     [:div.profile-row
      {:style {:background (str "url(" @gallery-pic ")")
               :position :relative
@@ -162,6 +162,27 @@
                                 ;;:left 200
                                 :font-size "3em" :color :blue}}]
      [profile-image-component profile-pic]]))
+
+(defn inline-editor [text on-change]
+  (let [s (reagent/atom {})]
+    (fn [text on-change]
+      (if (:editing? @s)
+        [:form {:on-submit #(do
+                              (.preventDefault %)
+                              (swap! s dissoc :editing?)
+                              (when on-change
+                                (on-change (:text @s))))}
+         [:input {:type :text :value (:text @s)
+                  :on-change #(swap! s assoc
+                                     :text (-> % .-target .-value))}]
+         [:button "Save"]
+         [:button {:on-click #(do (.preventDefault %)
+                                  (swap! s dissoc :editing?))}
+          "Cancel"]]
+        [:span {:on-click #(swap! s assoc
+                                  :editing? true
+                                  :text text)}
+         text [:sup "\u270e"]]))))
 
 (defn bio-component [bio]
   [:div.bio.noTwid {:style {:width "100%"
@@ -241,9 +262,13 @@
                       :margin-bottom 18
                       :color "#2a5e8d"}}
      [:div {:style {:position :relative}}
-      "Been there, loved it!"
-      [edit-icon-component 0 100 :medium :tagline]]]
-    [:p "Here is my bio with a bunch of details"]]])
+      [inline-editor
+       @(rf/subscribe [:subs/tagline])
+       #(rf/dispatch [:events/tagline %])]
+      #_[edit-icon-component 0 100 :medium :tagline]]]
+    [:p [inline-editor
+         @(rf/subscribe [:subs/bio-text])
+         #(rf/dispatch [:events/bio-text %])]]]])
 
 (defn handle-file-change [e]
   (let [reader (js/FileReader.)
@@ -257,57 +282,65 @@
     #_(set! (.-onload reader) #(js/console.log "Got file" (.-target e)))
     (set! (.-onerror reader) #(js/console.log "Got file error" (.-target %)))
     #_(set! (.-onload reader) #(js/console.log "Got file" (.-result (.-target %))))
-    (set! (.-onload reader) #(re-frame/dispatch [:events/file-url (.-result (.-target %))]))
+    (set! (.-onload reader) #(rf/dispatch [:events/file-url (.-result (.-target %))]))
     (js/console.log "Reader:" reader)
     (js/console.log "Reader onload:" (.-onload reader))
     (js/console.log "Reader onerror:" (.-onerror reader))
     (.readAsDataURL reader file)))
 
-(defn avatar-editor-ex []
+(defn avatar-editor-ex [editor-atom]
   (let [avatar-editor (g/get js/window "ReactAvatarEditor")]
-    [:div {:style {:position :relative
-                   :border "1px solid black"
-                   :height 200
-                   :width 200
-                   }}
-     [:span.fas.fa-camera {:style {:padding 10
-                                   :font-size "3em"
-                                   :color "#CCC"
-                                   :position :absolute
-                                   :top 0
-                                   :right 0
-                                   :width 65
-                                   :height 55}}]
-     [:input {:type :file :accept "image/*"
-              :style {:position :absolute
-                      :top 0
-                      :right 0
-                      :width 65
-                      :height 55
-                      :opacity 0.1
-                      }
-              :on-change #(handle-file-change %)}]
-     [:> avatar-editor {:image (or @(re-frame/subscribe [:subs/file-data])
-                                   @(re-frame/subscribe [:subs/photo])
+    [:div.user-avatar-container
+     {:style {:position :relative
+              ;:border "1px solid black"
+              :height 250
+              :width 250
+              }}
+     [:div
+      #_{:style {:box-sizing :border-box}}
+      [:span.fas.fa-camera {:style {:color "#CCC"
+                                    :padding 10
+                                    :position :absolute
+                                    :top -10
+                                    :right 0
+                                    :width 65
+                                    :height 55
+                                    :font-size "3em"
+                                    :display :inline-block
+                                    }}]
+      [:input {:type :file :accept "image/*"
+               :style {:position :absolute
+                       :top 0
+                       :right 0
+                       :width 65
+                       :height 55
+                       :opacity 0.0
+                       :cursor :pointer
+                       }
+               :on-change #(handle-file-change %)}]]
+     [:> avatar-editor {:image (or @(rf/subscribe [:subs/file-data])
+                                   @(rf/subscribe [:subs/photo])
                                    "http://loremflickr.com/200/200/face,closeup/all")
-                        :width 200
-                        :height 200
-                        :border 50
+                        :width 250
+                        :height 250
+                        :border 0
                         :color [255 255 255 0.6]
                         :scale 1
                         :rotate 0
                         :onImageReady #(js/console.log "Ready!")
                         :onMouseUp #(js/console.log "Mouse up")
-                        }]]))
+                        :ref #(do
+                                (js/console.log "Set editor atom to" %)
+                                (reset! editor-atom %))}]]))
 
 (defn image-gallery []
   (let [image-gallery (g/get js/window "ReactImageGallery")]
-    (js/console.log "Loading???" @(re-frame.subs/subscribe [:subs/gallery-loading?]))
+    (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
     [:div
-     (if (or @(re-frame.subs/subscribe [:subs/gallery-loading?])
-              (empty? @(re-frame.subs/subscribe [:subs/gallery-data])))
+     (if (or @(rf/subscribe [:subs/gallery-loading?])
+              (empty? @(rf/subscribe [:subs/gallery-data])))
        [:i.far.far-spinner.far-spin.far-2x]
-       [:> (.-default image-gallery) {:items @(re-frame.subs/subscribe [:subs/gallery-data])
+       [:> (.-default image-gallery) {:items @(rf/subscribe [:subs/gallery-data])
                                       ;;:renderItem #()
                                       :showFullscreenButton false
                                       :showPlayButton false}])]))
@@ -320,7 +353,21 @@
     :component-did-mount
     (fn []
       (js/console.log "Gallery mounted!")
-      (re-frame/dispatch [:events/load-gallery-data]))}))
+      (rf/dispatch [:events/load-gallery-data]))}))
+
+(defn save-gallery-photo [editor-atom]
+  (js/console.log "Save gallery photo")
+  (when-let [editor @editor-atom]
+    (let [canvas (.getImage editor)
+          data (.toDataURL canvas)]
+      #_(js/console.log "Canvas" canvas)
+      #_(js/console.log "Data" data)
+      (rf/dispatch [:events/save-gallery-photo data]))))
+
+(defn button-component-5 [editor-atom]
+  [:button
+   {:on-click #(save-gallery-photo editor-atom)}
+   "Click to add gallery photo"])
 
 (defn main-panel []
   [:div.container
@@ -335,13 +382,17 @@
      [button-component-3]]
     [:div
      [button-component-4]]
-      [:br]]
-   #_[agent-component
-      (re-frame/subscribe [:subs/gallery])
-      (re-frame/subscribe [:subs/photo])]
-   #_[bio-component {}]
-   #_[deals-component]
-   [avatar-editor-ex]
-   #_[image-gallery-ex]
-   [:div
-    [my-data-component]]])
+    #_[:div
+    [my-data-component]]
+    [:br]]
+   [agent-component
+      (rf/subscribe [:subs/gallery])
+      (rf/subscribe [:subs/photo])]
+   [bio-component {}]
+   [deals-component]
+   (let [editor-atom (atom nil)]
+     [:div
+      [avatar-editor-ex editor-atom]
+      [:div
+       [button-component-5 editor-atom]]])
+   [image-gallery-ex]])
