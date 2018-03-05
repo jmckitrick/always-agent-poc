@@ -5,17 +5,7 @@
             [re-frame.core :as rf]
             [always-agent-poc.events :as events]
             [always-agent-poc.subs :as subs]
-            [goog.object :as g]
-            #_[ImageGallery]
-            #_[AvatarEditor]
-            #_[AvatarEditor2]
-            #_[webpack.bundle]
-            #_[react-image-gallery :as gallery-1]
-            #_[react-avatar-editor :as editor-1]
-            #_["react-avatar-editor" :as editor-2]
-            #_["react-image-gallery" :as gallery-2]))
-
-(defonce edit (reagent/atom false))
+            [goog.object :as g]))
 
 (defn my-data-component []
   [:div
@@ -115,7 +105,7 @@
               (= true edit)
               (= :name target))
            [edit-text-component]
-           "Your agent Tony Stark"))
+           (str "Your agent " @(rf/subscribe [:subs/agent-name]))))
        [edit-icon-component -20 -20 :medium :name]]]]))
 
 (defn deal-component [{:keys [dealUrl imageUrl] :as deal}]
@@ -140,28 +130,21 @@
          [deal-component deal]))]]))
 
 (defn agent-component [gallery-pic profile-pic]
-  (let [[edit? target] @(rf/subscribe [:subs/edit-target])]
-    [:div.profile-row
-     {:style {:background (str "url(" @gallery-pic ")")
-              :position :relative
-              :width "100%"
-              :height 450
+  (when (and @gallery-pic @profile-pic)
+    (let [[edit? target] @(rf/subscribe [:subs/edit-target])]
+      [:div.profile-row
+       {:style {:background (str "url(" @gallery-pic ")")
+                :position :relative
+                :width "100%"
+                :height 450
                                         ;:margin 10
-              :background-position "center"
-              :background-size "cover"
-              :background-repeat "repeat"
-              :border (if (and edit? (= :gallery target))
-                        "2px solid blue" "2px solid transparent")}}
-     [edit-icon-component -30 -30 :large :gallery]
-     #_[:i.fas.fa-edit {:style {:position :absolute
-                                ;;:position :relative
-                                        ;:float :right
-                                ;;:top "5%";"85%"
-                                :top -30
-                                :right -30
-                                ;;:left 200
-                                :font-size "3em" :color :blue}}]
-     [profile-image-component profile-pic]]))
+                :background-position "center"
+                :background-size "cover"
+                :background-repeat "repeat"
+                :border (if (and edit? (= :gallery target))
+                          "2px solid blue" "2px solid transparent")}}
+       [edit-icon-component -30 -30 :large :gallery]
+       [profile-image-component profile-pic]])))
 
 (defn inline-editor [text on-change]
   (let [s (reagent/atom {})]
@@ -288,16 +271,31 @@
     (js/console.log "Reader onerror:" (.-onerror reader))
     (.readAsDataURL reader file)))
 
+(defn gallery-delete []
+  (js/console.log "Gallery delete!"))
+
 (defn avatar-editor-ex [editor-atom]
   (let [avatar-editor (g/get js/window "ReactAvatarEditor")]
     [:div.user-avatar-container
      {:style {:position :relative
-              ;:border "1px solid black"
-              :height 250
-              :width 250
+              ;;:border "1px solid black"
+              ;; :height 250
+              ;; :width 250
+              :height 100
+              :width 350
               }}
      [:div
-      #_{:style {:box-sizing :border-box}}
+      (when @(rf/subscribe [:subs/gallery-image-selected])
+        [:span.fas.fa-trash {:style {:color "#CCC"
+                                     :padding 10
+                                     :position :absolute
+                                     :top -8
+                                     :right 50
+                                     :width 65
+                                     :height 55
+                                     :font-size "3em"
+                                     :display :inline-block}
+                             :on-click #(gallery-delete)}])
       [:span.fas.fa-camera {:style {:color "#CCC"
                                     :padding 10
                                     :position :absolute
@@ -315,14 +313,16 @@
                        :width 65
                        :height 55
                        :opacity 0.0
-                       :cursor :pointer
-                       }
+                       :cursor :pointer}
                :on-change #(handle-file-change %)}]]
      [:> avatar-editor {:image (or @(rf/subscribe [:subs/file-data])
+                                   @(rf/subscribe [:subs/gallery-image-selected])
                                    @(rf/subscribe [:subs/photo])
                                    "http://loremflickr.com/200/200/face,closeup/all")
-                        :width 250
-                        :height 250
+                        ;; :width 250
+                        ;; :height 250
+                        :height 100
+                        :width 350
                         :border 0
                         :color [255 255 255 0.6]
                         :scale 1
@@ -333,6 +333,10 @@
                                 (js/console.log "Set editor atom to" %)
                                 (reset! editor-atom %))}]]))
 
+(defn select-image [e index]
+  #_(js/console.log "Select image" index)
+  (rf/dispatch [:events/select-image index]))
+
 (defn image-gallery []
   (let [image-gallery (g/get js/window "ReactImageGallery")]
     (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
@@ -342,6 +346,7 @@
        [:i.far.far-spinner.far-spin.far-2x]
        [:> (.-default image-gallery) {:items @(rf/subscribe [:subs/gallery-data])
                                       ;;:renderItem #()
+                                      :onThumbnailClick select-image
                                       :showFullscreenButton false
                                       :showPlayButton false}])]))
 
@@ -367,7 +372,17 @@
 (defn button-component-5 [editor-atom]
   [:button
    {:on-click #(save-gallery-photo editor-atom)}
-   "Click to add gallery photo"])
+   "Click to save gallery photo"])
+
+(defn button-component-6 []
+  [:button
+   {:on-click #(rf/dispatch [:events/load-gallery-data])}
+   "Click to refresh gallery"])
+
+(defn button-delete-item []
+  [:button
+   {:on-click #(rf/dispatch [:events/delete-gallery-item])}
+   "Click to delete selected item from gallery"])
 
 (defn main-panel []
   [:div.container
@@ -383,11 +398,12 @@
     [:div
      [button-component-4]]
     #_[:div
-    [my-data-component]]
+     [my-data-component]]
     [:br]]
    [agent-component
-      (rf/subscribe [:subs/gallery])
-      (rf/subscribe [:subs/photo])]
+    (rf/subscribe [:subs/gallery])
+    (rf/subscribe [:subs/photo])]
+   [:br]
    [bio-component {}]
    [deals-component]
    (let [editor-atom (atom nil)]
@@ -395,4 +411,8 @@
       [avatar-editor-ex editor-atom]
       [:div
        [button-component-5 editor-atom]]])
-   [image-gallery-ex]])
+   [:br]
+   [image-gallery-ex]
+   [:br]
+   [button-component-6]
+   [button-delete-item]])

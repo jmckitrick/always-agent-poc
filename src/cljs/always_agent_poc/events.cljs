@@ -5,9 +5,6 @@
    [re-frame.core :as rf]
    [always-agent-poc.db :as db]))
 
-(comment
-  (set! db/default-db {}))
-
 (rf/reg-event-db
  :events/initialize-db
  (fn  [_ _]
@@ -26,9 +23,9 @@
    (assoc db :my-event-arg arg1)))
 
 (rf/reg-sub
- :subs/name
+ :subs/agent-name
  (fn [db]
-   (:name db)))
+   (:agent-name db)))
 
 (rf/reg-event-db
  :events/good-ajax
@@ -211,21 +208,34 @@
  (fn [db [_ tagline]]
    (assoc db :tagline tagline)))
 
+(def data-uri-re #"^data:((.*?)(;charset=.*?)?)(;base64)?,")
+
 (defn data-uri->blob [uri]
   ;; "data:image/png;base64,foobar"
-  (let [byte-string (js/atob (get (.split uri ",") 1))
-        mime-string (-> uri
-                        (.split ",")
-                        (get 0)
-                        (.split ":")
-                        (get 1)
-                        (.split ";")
-                        (get 0))
-        ab (js/ArrayBuffer. (.-length byte-string))
-        ia (js/Uint8Array. ab)]
-    (doseq [i (range (.-length byte-string))]
-      (aset ia i (.charCodeAt byte-string i)))
-    (js/Blob. [ab] {:type mime-string})))
+  ;; "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter ….2525 0 0 0.2525 0.2525 0.2525 0 0 0 0 0 1 0'/></filter></svg>#grayscale"
+  ;; "data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7"
+
+  (if-let [matches (re-find data-uri-re uri)]
+    (let [media-type (if (matches 2)
+                       (matches 1)
+                       (str "text/plain" + (or (matches 3) ";charset=US-ASCII")))
+          is-base64 (seq (matches 4))
+          data-string ((.split uri ",") 1)
+          byte-string (js/atob ((.split uri ",") 1))
+          mime-string (-> uri
+                          (.split ",")
+                          0
+                          (.split ":")
+                          1
+                          (.split ";")
+                          0)
+          ab (js/ArrayBuffer. (.-length byte-string))
+          ia (js/Uint8Array. ab)]
+      (doseq [i (range (.-length byte-string))]
+        (aset ia i (.charCodeAt byte-string i)))
+      (js/Blob. [ab] {:type mime-string}))
+    ;; HANDLE ERROR??
+    ))
 
 (rf/reg-event-db
  :events/good-gallery-add
@@ -239,12 +249,52 @@
    (js/console.log "Save gallery photo")
    (let [form-data (js/FormData.)
          blob (data-uri->blob data)]
-     (js/console.log "Save gallery photo data" blob)
-     (.append form-data "gallery-photo" blob)
-     {:http-xhrio {:method :post
-                   :uri "http://thoragency.localhost/admin/rest/profile/gallery"
-                   :timeout 16000
-                   :body form-data
-                   :response-format (ajax/json-response-format {:keywords? true})
-                   :on-success [:events/good-gallery-add]
-                   :on-failure [:events/bad-ajax]}})))
+     (when blob
+       (js/console.log "Save gallery photo data" blob)
+       (.append form-data "gallery-photo" blob)
+       {:http-xhrio {:method :post
+                     :uri "http://thoragency.localhost/admin/rest/profile/gallery"
+                     :timeout 16000
+                     :body form-data
+                     :response-format (ajax/json-response-format {:keywords? true})
+                     :on-success [:events/good-gallery-add]
+                     :on-failure [:events/bad-ajax]}}))))
+
+
+(rf/reg-event-db
+ :events/select-image
+ (fn [db [_ index]]
+   (js/console.log "Select image" index)
+   (when-let [selected-image (get (:gallery db) index)]
+     (assoc db :selected-image selected-image))))
+
+(rf/reg-event-fx
+ :events/good-gallery-delete
+ (fn [{:keys [db]} _]
+   (js/console.log "Successful gallery delete")
+   {:db (dissoc db :selected-image)
+    :dispatch [:events/load-gallery-data]}))
+
+(rf/reg-sub
+ :subs/gallery-image-selected
+ (fn [db]
+   (get-in db [:selected-image :original])))
+
+(rf/reg-event-fx
+ :events/delete-gallery-item
+ (fn [{:keys [db]}]
+   (when-let [item (:selected-image db)]
+     (js/console.log "Delete gallery item" item)
+     (let [enc-item (js/encodeURIComponent (:key item))]
+       (js/console.log "Delete gallery encoded item" enc-item)
+       {:db (assoc db :gallery-loading? true)
+        :http-xhrio {:method :delete
+                     :uri (str
+                           "http://thoragency.localhost/admin/rest/profile/gallery/" enc-item)
+                     ;;:with-credentials true
+                     :timeout 60000
+                     :format (ajax/text-request-format)
+                     ;;:response-format (ajax/json-response-format {:keywords? true})
+                     :response-format (ajax/text-response-format)
+                     :on-success [:events/good-gallery-delete]
+                     :on-failure [:events/bad-ajax]}}))))
