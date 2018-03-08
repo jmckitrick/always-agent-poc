@@ -3,7 +3,8 @@
    [ajax.core :as ajax]
    [day8.re-frame.http-fx]
    [re-frame.core :as rf]
-   [always-agent-poc.db :as db]))
+   [always-agent-poc.db :as db]
+   [goog.object :as g]))
 
 (rf/reg-event-db
  :events/initialize-db
@@ -208,40 +209,62 @@
  (fn [db [_ tagline]]
    (assoc db :tagline tagline)))
 
+(def blob-builder (or
+                   (g/get js/window "BlobBuilder")
+                   (g/get js/window "WebKitBlobBuilder")
+                   (g/get js/window "MozBlobBuilder")
+                   (g/get js/window "MSBlobBuilder")))
+(def has-blob-constructor (and js/Blob
+                               (try (do (js/Blob.) true)
+                                    (catch ExceptionInfo e
+                                      false))))
+(def has-array-buffer-view-support (and has-blob-constructor
+                                        js/Uint8Array
+                                        (try (= (.-size (js/Blob. [(js/Uint8Array. 100)])))
+                                             (catch ExceptionInfo e
+                                               false))))
+
 (def data-uri-re #"^data:((.*?)(;charset=.*?)?)(;base64)?,")
 
 (defn data-uri->blob [uri]
   ;; "data:image/png;base64,foobar"
   ;; "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter ….2525 0 0 0.2525 0.2525 0.2525 0 0 0 0 0 1 0'/></filter></svg>#grayscale"
   ;; "data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7"
-
-  (if-let [matches (re-find data-uri-re uri)]
+  (when-let [matches (re-find data-uri-re uri)]
+    (js/console.log "Matched uri")
     (let [media-type (if (matches 2)
                        (matches 1)
                        (str "text/plain" + (or (matches 3) ";charset=US-ASCII")))
           is-base64 (seq (matches 4))
-          data-string ((.split uri ",") 1)
-          byte-string (js/atob ((.split uri ",") 1))
+          data-string (get (.split uri ",") 1)
+          byte-string (if is-base64
+                        (js/atob data-string)
+                        (js/decodeURIComponent data-string))
           mime-string (-> uri
                           (.split ",")
-                          0
+                          (get 0)
                           (.split ":")
-                          1
+                          (get 1)
                           (.split ";")
-                          0)
+                          (get 0))
           ab (js/ArrayBuffer. (.-length byte-string))
           ia (js/Uint8Array. ab)]
+      (js/console.log "Doing aset")
       (doseq [i (range (.-length byte-string))]
         (aset ia i (.charCodeAt byte-string i)))
-      (js/Blob. [ab] {:type mime-string}))
-    ;; HANDLE ERROR??
-    ))
+      (if has-blob-constructor
+        (js/Blob. [(if has-array-buffer-view-support
+                     ia ab)] {:type mime-string})
+        (let [bb (blob-builder.)]
+          (.append bb ab)
+          (.getBlob bb mime-string))))))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  :events/good-gallery-add
- (fn [db]
+ (fn [{:keys [db] :as cofx}]
    (js/console.log "Successful gallery add")
-   db))
+   {:db db
+    :dispatch [:events/load-gallery-data]}))
 
 (rf/reg-event-fx
  :events/save-gallery-photo
@@ -256,7 +279,7 @@
                      :uri "http://thoragency.localhost/admin/rest/profile/gallery"
                      :timeout 16000
                      :body form-data
-                     :response-format (ajax/json-response-format {:keywords? true})
+                     :response-format (ajax/text-response-format)
                      :on-success [:events/good-gallery-add]
                      :on-failure [:events/bad-ajax]}}))))
 

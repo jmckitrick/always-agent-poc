@@ -2,7 +2,7 @@
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
                  [reagent "0.7.0"]
-                 [re-frame "0.10.4"]
+                 [re-frame "0.10.5"]
                  [day8.re-frame/http-fx "0.1.5"]
                  [cljs-ajax "0.7.3"]
                  [devcards "0.2.4"]
@@ -30,10 +30,11 @@
   :profiles
   {:dev
    {:dependencies [[binaryage/devtools "0.9.9"]
-                   [figwheel-sidecar "0.5.14"]
-                   [com.cemerick/piggieback "0.2.2"]]
+                   [figwheel-sidecar "0.5.15"]
+                   [com.cemerick/piggieback "0.2.2"]
+                   [day8.re-frame/re-frame-10x "0.2.0"]]
 
-    :plugins      [[lein-figwheel "0.5.14"]]}}
+    :plugins      [[lein-figwheel "0.5.15"]]}}
 
   :cljsbuild
   {:builds
@@ -45,7 +46,8 @@
                     :output-dir           "resources/public/js/compiled/out"
                     :asset-path           "js/compiled/out"
                     :source-map-timestamp true
-                    :preloads             [devtools.preload]
+                    :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                    :preloads             [devtools.preload day8.re-frame-10x.preload]
                     :external-config      {:devtools/config {:features-to-install :all}}
                     ;;:infer-externs true
                     ;; :externs ["externs.js"]
@@ -72,7 +74,7 @@
                     }}
 
     {:id           "min"
-     :source-paths ["src/cljs"]
+     :source-paths ["src/cljs" "src"]
      :compiler     {:main            always-agent-poc.core
                     :output-to       "resources/public/js/compiled/app.js"
                     :optimizations   :advanced

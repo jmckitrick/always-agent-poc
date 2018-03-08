@@ -21,7 +21,7 @@
 (defn button-component-0 []
   [:button
    {:on-click #(rf/dispatch [:events/initialize-db])}
-   "Click me 0"])
+   "Reset app db"])
 
 (defn button-component []
   [:button
@@ -36,12 +36,12 @@
 (defn button-component-3 []
   [:button
    {:on-click #(rf/dispatch [:events/ajax-tst])}
-   "Click me C"])
+   "Load Always Agent Info"])
 
 (defn button-component-4 []
   [:button
    {:on-click #(rf/dispatch [:events/deal-destinations])}
-   "Click me D"])
+   "Load Deal Destinations"])
 
 (defn toggle-edit [a target]
   (swap! a not)
@@ -129,9 +129,9 @@
          ^{:key (:cityId deal)}
          [deal-component deal]))]]))
 
-(defn agent-component [gallery-pic profile-pic]
+(defn agent-component [gallery-pic profile-pic edit-target]
   (when (and @gallery-pic @profile-pic)
-    (let [[edit? target] @(rf/subscribe [:subs/edit-target])]
+    (let [[edit? target] @edit-target]
       [:div.profile-row
        {:style {:background (str "url(" @gallery-pic ")")
                 :position :relative
@@ -147,7 +147,7 @@
        [profile-image-component profile-pic]])))
 
 (defn inline-editor [text on-change]
-  (let [s (reagent/atom {})]
+  (let [s (reagent/atom {:text text})]
     (fn [text on-change]
       (if (:editing? @s)
         [:form {:on-submit #(do
@@ -167,7 +167,7 @@
                                   :text text)}
          text [:sup "\u270e"]]))))
 
-(defn bio-component [bio]
+(defn bio-component [bio-tagline bio-text]
   [:div.bio.noTwid {:style {:width "100%"
                             :padding-top 39
                             :float :none
@@ -246,11 +246,13 @@
                       :color "#2a5e8d"}}
      [:div {:style {:position :relative}}
       [inline-editor
-       @(rf/subscribe [:subs/tagline])
+       @bio-tagline
+       #_@(rf/subscribe [:subs/tagline])
        #(rf/dispatch [:events/tagline %])]
       #_[edit-icon-component 0 100 :medium :tagline]]]
     [:p [inline-editor
-         @(rf/subscribe [:subs/bio-text])
+         @bio-text
+         #_@(rf/subscribe [:subs/bio-text])
          #(rf/dispatch [:events/bio-text %])]]]])
 
 (defn handle-file-change [e]
@@ -272,7 +274,8 @@
     (.readAsDataURL reader file)))
 
 (defn gallery-delete []
-  (js/console.log "Gallery delete!"))
+  (js/console.log "Gallery delete!")
+  (rf/dispatch [:events/delete-gallery-item]))
 
 (defn avatar-editor-ex [editor-atom]
   (let [avatar-editor (g/get js/window "ReactAvatarEditor")]
@@ -330,7 +333,7 @@
                         :onImageReady #(js/console.log "Ready!")
                         :onMouseUp #(js/console.log "Mouse up")
                         :ref #(do
-                                (js/console.log "Set editor atom to" %)
+                                (js/console.log "Set avatar editor atom to" %)
                                 (reset! editor-atom %))}]]))
 
 (defn select-image [e index]
@@ -341,14 +344,14 @@
   (let [image-gallery (g/get js/window "ReactImageGallery")]
     (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
     [:div
-     (if (or @(rf/subscribe [:subs/gallery-loading?])
-              (empty? @(rf/subscribe [:subs/gallery-data])))
-       [:i.far.far-spinner.far-spin.far-2x]
-       [:> (.-default image-gallery) {:items @(rf/subscribe [:subs/gallery-data])
-                                      ;;:renderItem #()
-                                      :onThumbnailClick select-image
-                                      :showFullscreenButton false
-                                      :showPlayButton false}])]))
+     (if @(rf/subscribe [:subs/gallery-loading?])
+       [:i.fas.fa-spinner.fa-spin.fa-8x]
+       (when-not (empty? @(rf/subscribe [:subs/gallery-data]))
+         [:> (.-default image-gallery) {:items @(rf/subscribe [:subs/gallery-data])
+                                        ;;:renderItem #()
+                                        :onThumbnailClick select-image
+                                        :showFullscreenButton false
+                                        :showPlayButton false}]))]))
 
 (defn image-gallery-ex []
   (reagent/create-class
@@ -377,21 +380,21 @@
 (defn button-component-6 []
   [:button
    {:on-click #(rf/dispatch [:events/load-gallery-data])}
-   "Click to refresh gallery"])
+   "Load gallery"])
 
 (defn button-delete-item []
   [:button
    {:on-click #(rf/dispatch [:events/delete-gallery-item])}
-   "Click to delete selected item from gallery"])
+   "Delete selected item from gallery"])
 
 (defn main-panel []
   [:div.container
    [:div
     [:div
      [button-component-0]]
-    [:div
+    #_[:div
      [button-component]]
-    [:div
+    #_[:div
      [button-component-2]]
     [:div
      [button-component-3]]
@@ -402,9 +405,12 @@
     [:br]]
    [agent-component
     (rf/subscribe [:subs/gallery])
-    (rf/subscribe [:subs/photo])]
+    (rf/subscribe [:subs/photo])
+    (rf/subscribe [:subs/edit-target])]
    [:br]
-   [bio-component {}]
+   [bio-component
+    (rf/subscribe [:subs/tagline])
+    (rf/subscribe [:subs/bio-text])]
    [deals-component]
    (let [editor-atom (atom nil)]
      [:div
