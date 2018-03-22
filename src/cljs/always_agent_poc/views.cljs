@@ -5,7 +5,9 @@
             [re-frame.core :as rf]
             [always-agent-poc.events :as events]
             [always-agent-poc.subs :as subs]
-            [goog.object :as g]))
+            [goog.object :as g]
+            ["react-avatar-editor" :as react-avatar-editor]
+            ["react-image-gallery" :as react-image-gallery]))
 
 (defn my-data-component []
   [:div
@@ -278,7 +280,9 @@
   (rf/dispatch [:events/delete-gallery-item]))
 
 (defn avatar-editor-ex [editor-atom]
-  (let [avatar-editor (g/get js/window "ReactAvatarEditor")]
+  (let [;;avatar-editor (g/get js/window "ReactAvatarEditor")
+        avatar-editor react-avatar-editor
+        ]
     [:div.user-avatar-container
      {:style {:position :relative
               ;;:border "1px solid black"
@@ -341,7 +345,9 @@
   (rf/dispatch [:events/select-image index]))
 
 (defn image-gallery []
-  (let [image-gallery (g/get js/window "ReactImageGallery")]
+  (let [;;image-gallery (g/get js/window "ReactImageGallery")
+        image-gallery react-image-gallery
+        ]
     (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
     [:div
      (if @(rf/subscribe [:subs/gallery-loading?])
@@ -388,6 +394,10 @@
    "Delete selected item from gallery"])
 
 (defn main-panel []
+  (js/console.log "react-avatar-editor" react-avatar-editor)
+  (js/console.dir "react-avatar-editor" react-avatar-editor)
+  (js/console.log "react-image-gallery" react-image-gallery)
+  (js/console.dir "react-image-gallery" react-image-gallery)
   [:div.container
    [:div
     [:div
@@ -418,7 +428,7 @@
       [:div
        [button-component-5 editor-atom]]])
    [:br]
-   [image-gallery-ex]
+   #_[image-gallery-ex]
    [:br]
    [button-component-6]
    [button-delete-item]])

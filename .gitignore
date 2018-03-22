@@ -1,8 +1,9 @@
 /*.log
 /target
 /*-init.clj
-/resources/public/js/compiled
+/resources/public/js
 out
 .cljs_rhino_repl
 node_modules
 .nrepl-port
+.shadow-cljs

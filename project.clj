@@ -1,6 +1,6 @@
 (defproject always-agent-poc "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/clojurescript "1.9.946"]
+                 [org.clojure/clojurescript "1.9.946" :scope "provided"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.5"]
                  [day8.re-frame/http-fx "0.1.5"]
@@ -21,7 +21,7 @@
 
   :source-paths ["src/clj"]
 
-  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  :clean-targets ^{:protect false} ["resources/public/js" "target"]
 
   :figwheel {:css-dirs ["resources/public/css"]}
 
@@ -42,9 +42,9 @@
      :source-paths ["src/cljs" "src"]
      :figwheel     {:on-jsload "always-agent-poc.core/mount-root"}
      :compiler     {:main                 always-agent-poc.core
-                    :output-to            "resources/public/js/compiled/app.js"
-                    :output-dir           "resources/public/js/compiled/out"
-                    :asset-path           "js/compiled/out"
+                    :output-to            "resources/public/js/app.js"
+                    :output-dir           "resources/public/js/out"
+                    :asset-path           "js/out"
                     :source-map-timestamp true
                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
                     :preloads             [devtools.preload day8.re-frame-10x.preload]
@@ -65,9 +65,9 @@
      :figwheel     {;;:on-jsload "always-agent-poc.core/mount-root"
                     :devcards true}
      :compiler     {:main                 always-agent-poc.core
-                    :output-to            "resources/public/js/compiled/devcards_app.js"
-                    :output-dir           "resources/public/js/compiled/devcards_out"
-                    :asset-path           "js/compiled/devcards_out"
+                    :output-to            "resources/public/js/devcards_app.js"
+                    :output-dir           "resources/public/js/devcards_out"
+                    :asset-path           "js/devcards_out"
                     :source-map-timestamp true
                     ;;:preloads             [devtools.preload]
                     ;;:external-config      {:devtools/config {:features-to-install :all}}
@@ -76,7 +76,7 @@
     {:id           "min"
      :source-paths ["src/cljs" "src"]
      :compiler     {:main            always-agent-poc.core
-                    :output-to       "resources/public/js/compiled/app.js"
+                    :output-to       "resources/public/js/app.js"
                     :optimizations   :advanced
                     :closure-defines {goog.DEBUG false}
                     :pretty-print    false}}
