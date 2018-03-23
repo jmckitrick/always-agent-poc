@@ -4,9 +4,18 @@ A [re-frame][1] application to show an Always-Agent configuration page.
 
 ## Development Mode
 
+### Double Bundle
+
+```
+npm i
+npm run-script build
+```
+
 ### Start Cider from Emacs:
 
 Put this in your Emacs config file:
+
+NB: This may no longer be necessary with current CIDER
 
 ```
 (setq cider-cljs-lein-repl
@@ -30,16 +39,21 @@ Figwheel will automatically push cljs changes to the browser.
 
 Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 
-## Production Build
+### [For shadow-cljs][2]
 
-To compile clojurescript to javascript:
+Use shadow to build the app
 
-```
-lein clean
-lein cljsbuild once min
-```
+$ shadow-cljs compile
 
-## [shadow-cljs][2]
+OR
+
+$ shadow-cljs watch
+
+#### To connect in emacs
+
+First, run `cider-connect`
+
+Then when the REPL is ready:
 
 ```
 (shadow.cljs.devtools.api/repl :app)
