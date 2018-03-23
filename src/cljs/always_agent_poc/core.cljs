@@ -14,7 +14,7 @@
 (defonce my-image (atom "http://loremflickr.com/200/200/face,closeup/all"))
 (defonce my-bg (atom "http://loremflickr.com/800/400/travel/all"))
 (defonce my-bg2 (atom "http://loremflickr.com/350/350/travel/all"))
-
+#_
 (defcard-rg agent-component-card
   "## Agent component"
   [views/agent-component my-bg my-image]

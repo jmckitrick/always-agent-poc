@@ -7,11 +7,18 @@
                  [cljs-ajax "0.7.3"]
                  [devcards "0.2.4"]
                  [sablono "0.8.3"]
+                 ;; These can be removed if we are importing
+                 ;; react by either the double bundle or if
+                 ;; imported via npm/shadow-cljs.
                  #_[cljsjs/react "16.2.0-3"]
                  #_[cljsjs/react-dom "16.2.0-3"]
+                 ;; Currently not used
                  #_[org.webjars/bootstrap "4.0.0"]]
 
-  :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]
+  ;; These are used with the double bundle method,
+  ;; but they also require empty namespaces that
+  ;; will mirror these dependencies.
+  ;;:exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-ancient "0.6.15"]
@@ -43,12 +50,13 @@
      :figwheel     {:on-jsload "always-agent-poc.core/mount-root"}
      :compiler     {:main                 always-agent-poc.core
                     :output-to            "resources/public/js/app.js"
-                    :output-dir           "resources/public/js/out"
-                    :asset-path           "js/out"
+                    :output-dir           "resources/public/js"
+                    :asset-path           "js"
                     :source-map-timestamp true
                     :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
                     :preloads             [devtools.preload day8.re-frame-10x.preload]
                     :external-config      {:devtools/config {:features-to-install :all}}
+                    ;; DEPRECATED???
                     ;;:infer-externs true
                     ;; :externs ["externs.js"]
                     ;; :foreign-libs [{:file "public/js/bundle.js" :provides ["cljsjs.react" "cljsjs.react.dom" "webpack.bundle"]}
@@ -79,9 +87,4 @@
                     :output-to       "resources/public/js/app.js"
                     :optimizations   :advanced
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
-
-
-    ]}
-
-  )
+                    :pretty-print    false}}]})

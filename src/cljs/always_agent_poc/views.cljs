@@ -8,8 +8,8 @@
             [goog.object :as g]
             ;; This is the shadow-cljs method of npm module import.
             ;; They are not necessary with the double bundle method.
-            ["react-avatar-editor" :as react-avatar-editor]
-            ["react-image-gallery" :as react-image-gallery]))
+            #_["react-avatar-editor" :as react-avatar-editor]
+            #_["react-image-gallery" :as react-image-gallery]))
 
 (defn my-data-component []
   [:div
@@ -249,9 +249,9 @@
                       :margin-bottom 18
                       :color "#2a5e8d"}}
      [:div {:style {:position :relative}}
-      [inline-editor @bio-tagline #(rf/dispatch [:events/tagline %])]]]
+      [inline-editor bio-tagline #(rf/dispatch [:events/tagline %])]]]
     [:p
-     [inline-editor @bio-text #(rf/dispatch [:events/bio-text %])]]]])
+     [inline-editor bio-text #(rf/dispatch [:events/bio-text %])]]]])
 
 (defn handle-file-change [e]
   (let [reader (js/FileReader.)
@@ -283,7 +283,8 @@ For double bundle:
 [avatar-editor (g/get js/window \"ReactAvatarEditor\")]
 NB: Unlike some npm components (react-image-gallery, for example)
 this component is not found under 'default' property."
-  (let [avatar-editor react-avatar-editor]
+  (let [;;avatar-editor react-avatar-editor
+        avatar-editor (g/get js/window "ReactAvatarEditor")]
     [:div.user-avatar-container
      {:style {:position :relative
               ;;:border "1px solid black"
@@ -353,7 +354,8 @@ For double bundle:
 [image-gallery (g/get js/window \"ReactImageGallery\")]
 NB: Some npm components (react-image-gallery, for example)
 are found under 'default' property."
-  (let [image-gallery react-image-gallery]
+  (let [;;image-gallery react-image-gallery
+        image-gallery (g/get js/window "ReactImageGallery")]
     (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
     [:div
      (if @(rf/subscribe [:subs/gallery-loading?])
@@ -401,10 +403,10 @@ are found under 'default' property."
    "Delete selected item from gallery"])
 
 (defn main-panel []
-  (js/console.log "react-avatar-editor" react-avatar-editor)
-  (js/console.dir "react-avatar-editor" react-avatar-editor)
-  (js/console.log "react-image-gallery" react-image-gallery)
-  (js/console.dir "react-image-gallery" react-image-gallery)
+  ;;(js/console.log "react-avatar-editor" react-avatar-editor)
+  ;;(js/console.dir "react-avatar-editor" react-avatar-editor)
+  ;;(js/console.log "react-image-gallery" react-image-gallery)
+  ;;(js/console.dir "react-image-gallery" react-image-gallery)
   [:div.container
    [:div
     [:div
@@ -426,8 +428,8 @@ are found under 'default' property."
     (rf/subscribe [:subs/edit-target])]
    [:br]
    [bio-component
-    (rf/subscribe [:subs/tagline])
-    (rf/subscribe [:subs/bio-text])]
+    @(rf/subscribe [:subs/tagline])
+    @(rf/subscribe [:subs/bio-text])]
    [deals-component]
    (let [editor-atom (atom nil)]
      [:div
