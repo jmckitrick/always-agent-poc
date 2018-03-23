@@ -45,5 +45,11 @@ lein cljsbuild once min
 (shadow.cljs.devtools.api/repl :app)
 ```
 
+## TODO
+
+- try devcards with the shadow build
+- research re-frame subscription derefs
+ and determine where best to place them when passing to components
+
 [1]: https://github.com/Day8/re-frame
 [2]: https://shadow-cljs.github.io/docs/UsersGuide.html
