@@ -151,20 +151,28 @@
  :events/load-gallery-data
  (fn [{:keys [db]} _]
    (js/console.log "Get gallery data...")
-   {:db (assoc db :gallery-loading? true)
+   {:db (-> db
+            (dissoc :gallery-fail)
+            (assoc :gallery-loading? true))
     :http-xhrio {:method :get
                  :uri "http://thoragency.localhost/admin/rest/profile/gallery"
-                 ;;:with-credentials true
-                 :timeout 60000
                  :response-format (ajax/json-response-format {:keywords? true})
                  :on-success [:events/good-gallery]
-                 :on-failure [:events/bad-ajax]}}))
+                 :on-failure [:events/bad-gallery]}}))
 
 (rf/reg-event-db
  :events/good-gallery
  (fn [db [_ data]]
    (js/console.log "Successful gallery" data)
    (assoc db :gallery data :gallery-loading? false)))
+
+(rf/reg-event-db
+ :events/bad-gallery
+ (fn [db [_ data]]
+   (js/console.log "Failure to get gallery" data)
+   (-> db
+       (dissoc :gallery)
+       (assoc :gallery-fail true :gallery-loading? false))))
 
 (rf/reg-sub
  :subs/gallery-loading?
@@ -209,6 +217,10 @@
  (fn [db [_ tagline]]
    (assoc db :tagline tagline)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; blob functions from Igor and StackOverflow
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (def blob-builder (or
                    (g/get js/window "BlobBuilder")
                    (g/get js/window "WebKitBlobBuilder")
@@ -229,7 +241,9 @@
 (defn data-uri->blob [uri]
   ;; "data:image/png;base64,foobar"
   ;; "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter ….2525 0 0 0.2525 0.2525 0.2525 0 0 0 0 0 1 0'/></filter></svg>#grayscale"
-  ;; "data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7"
+  ;; (str "data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////"
+  ;;      "wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQA"
+  ;;      "osJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7")
   (when-let [matches (re-find data-uri-re uri)]
     (js/console.log "Matched uri")
     (let [media-type (if (matches 2)
@@ -314,7 +328,7 @@
         :http-xhrio {:method :delete
                      :uri (str
                            "http://thoragency.localhost/admin/rest/profile/gallery/" enc-item)
-                     ;;:with-credentials true
+                     :with-credentials true
                      :timeout 60000
                      :format (ajax/text-request-format)
                      ;;:response-format (ajax/json-response-format {:keywords? true})

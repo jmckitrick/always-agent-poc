@@ -6,6 +6,8 @@
             [always-agent-poc.events :as events]
             [always-agent-poc.subs :as subs]
             [goog.object :as g]
+            ;; This is the shadow-cljs method of npm module import.
+            ;; They are not necessary with the double bundle method.
             ["react-avatar-editor" :as react-avatar-editor]
             ["react-image-gallery" :as react-image-gallery]))
 
@@ -247,15 +249,9 @@
                       :margin-bottom 18
                       :color "#2a5e8d"}}
      [:div {:style {:position :relative}}
-      [inline-editor
-       @bio-tagline
-       #_@(rf/subscribe [:subs/tagline])
-       #(rf/dispatch [:events/tagline %])]
-      #_[edit-icon-component 0 100 :medium :tagline]]]
-    [:p [inline-editor
-         @bio-text
-         #_@(rf/subscribe [:subs/bio-text])
-         #(rf/dispatch [:events/bio-text %])]]]])
+      [inline-editor @bio-tagline #(rf/dispatch [:events/tagline %])]]]
+    [:p
+     [inline-editor @bio-text #(rf/dispatch [:events/bio-text %])]]]])
 
 (defn handle-file-change [e]
   (let [reader (js/FileReader.)
@@ -280,9 +276,14 @@
   (rf/dispatch [:events/delete-gallery-item]))
 
 (defn avatar-editor-ex [editor-atom]
-  (let [;;avatar-editor (g/get js/window "ReactAvatarEditor")
-        avatar-editor react-avatar-editor
-        ]
+  "Show an avatar editor used as an image uploader.
+For shadow-cljs:
+[avatar-editor react-avatar-editor]
+For double bundle:
+[avatar-editor (g/get js/window \"ReactAvatarEditor\")]
+NB: Unlike some npm components (react-image-gallery, for example)
+this component is not found under 'default' property."
+  (let [avatar-editor react-avatar-editor]
     [:div.user-avatar-container
      {:style {:position :relative
               ;;:border "1px solid black"
@@ -345,14 +346,20 @@
   (rf/dispatch [:events/select-image index]))
 
 (defn image-gallery []
-  (let [;;image-gallery (g/get js/window "ReactImageGallery")
-        image-gallery react-image-gallery
-        ]
+  "Show an image gallery.
+For shadow-cljs:
+[image-gallery react-image-gallery]
+For double bundle:
+[image-gallery (g/get js/window \"ReactImageGallery\")]
+NB: Some npm components (react-image-gallery, for example)
+are found under 'default' property."
+  (let [image-gallery react-image-gallery]
     (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
     [:div
      (if @(rf/subscribe [:subs/gallery-loading?])
        [:i.fas.fa-spinner.fa-spin.fa-8x]
-       (when-not (empty? @(rf/subscribe [:subs/gallery-data]))
+       (if (empty? @(rf/subscribe [:subs/gallery-data]))
+         [:i.fas.fa-exclamation-circle.fa-4x]
          [:> (.-default image-gallery) {:items @(rf/subscribe [:subs/gallery-data])
                                         ;;:renderItem #()
                                         :onThumbnailClick select-image
@@ -410,7 +417,7 @@
      [button-component-3]]
     [:div
      [button-component-4]]
-    #_[:div
+    [:div
      [my-data-component]]
     [:br]]
    [agent-component
@@ -428,7 +435,7 @@
       [:div
        [button-component-5 editor-atom]]])
    [:br]
-   #_[image-gallery-ex]
+   [image-gallery-ex]
    [:br]
    [button-component-6]
    [button-delete-item]])
