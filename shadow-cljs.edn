@@ -26,10 +26,4 @@
     :after-load always-agent-poc.core/mount-root}
    :modules
    {:main
-    {:entries [always-agent-poc.core]}}
-   :js-options
-   {:resolve
-    {"react" {:target :npm :require "preact-compat"}
-     "react-dom" {:target :npm :require "preact-compat"}
-     "create-react-class" {:target :npm :require "preact-compat/lib/create-react-class"}}}
-   }}}
+    {:entries [always-agent-poc.core]}}}}}

@@ -11,6 +11,8 @@ npm i
 npm run-script build
 ```
 
+Source code for double bundle is annotated `_DB_`
+
 ### Start Cider from Emacs:
 
 Put this in your Emacs config file:
@@ -57,6 +59,8 @@ $ shadow-cljs watch
 ```
 (shadow.cljs.devtools.api/repl :app)
 ```
+
+Source code for double bundle is annotated `_SH_`
 
 ## TODO
 

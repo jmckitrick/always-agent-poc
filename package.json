@@ -11,8 +11,6 @@
     "webpack": "3.11.0"
   },
   "dependencies": {
-    "preact": "^8.2.7",
-    "preact-compat": "^3.18.0",
     "react": "^15.5.4",
     "react-avatar-editor": "^10.3.0",
     "react-dom": "^15.5.4",

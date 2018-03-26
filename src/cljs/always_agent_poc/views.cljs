@@ -8,6 +8,7 @@
             [goog.object :as g]
             ;; This is the shadow-cljs method of npm module import.
             ;; They are not necessary with the double bundle method.
+            ;; _SH_
             #_["react-avatar-editor" :as react-avatar-editor]
             #_["react-image-gallery" :as react-image-gallery]))
 
@@ -283,7 +284,9 @@ For double bundle:
 [avatar-editor (g/get js/window \"ReactAvatarEditor\")]
 NB: Unlike some npm components (react-image-gallery, for example)
 this component is not found under 'default' property."
-  (let [;;avatar-editor react-avatar-editor
+  (let [;; _SH_
+        ;;avatar-editor react-avatar-editor
+        ;; _DB_
         avatar-editor (g/get js/window "ReactAvatarEditor")]
     [:div.user-avatar-container
      {:style {:position :relative
@@ -354,7 +357,9 @@ For double bundle:
 [image-gallery (g/get js/window \"ReactImageGallery\")]
 NB: Some npm components (react-image-gallery, for example)
 are found under 'default' property."
-  (let [;;image-gallery react-image-gallery
+  (let [;; _SH_
+        ;;image-gallery react-image-gallery
+        ;; _DB_
         image-gallery (g/get js/window "ReactImageGallery")]
     (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
     [:div

@@ -18,7 +18,8 @@
   ;; These are used with the double bundle method,
   ;; but they also require empty namespaces that
   ;; will mirror these dependencies.
-  ;;:exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]
+  ;; _DB_
+  :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-ancient "0.6.15"]
