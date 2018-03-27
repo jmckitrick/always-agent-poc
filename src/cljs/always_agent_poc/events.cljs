@@ -328,7 +328,7 @@
         :http-xhrio {:method :delete
                      :uri (str
                            "http://thoragency.localhost/admin/rest/profile/gallery/" enc-item)
-                     :with-credentials true
+                     ;;:with-credentials true
                      :timeout 60000
                      :format (ajax/text-request-format)
                      ;;:response-format (ajax/json-response-format {:keywords? true})
