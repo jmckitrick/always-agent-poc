@@ -23,6 +23,9 @@ This approach is simple, but if the library or version
 we want is not available, unless we want to try creating
 a CLJSJS module, this method will not work.
 
+Advantage: Simple and seamless to use, no JS needed.
+
+
 ### 'Double Bundle'
 
 The ['Double Bundle'][2] approach uses Webpack to build the
@@ -35,6 +38,9 @@ There are some drawbacks.
 1. Must use `get` on global object to access the object and use it.
 1. Advanced compilation might not work yet.
 
+Advantage: Uses standard tools for JS and CLJS: NPM and cljs-build, respectively.
+
+
 ### Shadow-CLJS
 
 [Shadow-CLJS][4] is a NPM tool for compiling CLJS
@@ -43,14 +49,18 @@ job of handling external libraries, integrating with
 and even replacing other tools. But there are tradeoffs.
 
 1. A new tool is introduced into the build chain.
+1. A `shadow-cljs.edn` configuration file is needed.
 1. An unusual quoted `require` statement is needed.
+
+Advantages: One tool handles JS and CLJS, including dependencies.
+
 
 ## Development
 
 Method | Additional Required Tools | Source Annotation | Development Endpoint
 ------ | ------------------------- | ----------------- | --------------------
-CLJSJS | None                      | `_CLJSJS_`        | 0.0.0.0:3449
-Double Bundle | NPM, Webpack | `_DOUBLE_`              | 0.0.0.0:3449
+CLJSJS | None                      | `_CLJSJS_`        | localhost:3449
+Double Bundle | NPM, Webpack | `_DOUBLE_`              | localhost:3449
 Shadow CLJS | NPM, Shadow-CLJS | `_SHADOW_`            | localhost:8080/shadow.html
 
 ### CLJSJS
@@ -68,7 +78,6 @@ npm run-script build
 ### Running application in Figwheel (development) mode (Methods 1 & 2):
 
 ```bash
-lein clean
 lein figwheel
 ```
 
@@ -76,13 +85,14 @@ Figwheel will automatically push cljs changes to the browser.
 
 Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 
-### Running application in development mode (Method 3):
 
+### Running in development mode (Method 3):
 
 ### Shadow-CLJS
 
 ```bash
-$ shadow-cljs watch
+npm i
+shadow-cljs watch
 ```
 
 The command above gives a HUD similar to Figwheel.
@@ -92,6 +102,7 @@ Browse to http://localhost:8080/shadow.html
 As you edit source code, changes are automatically pushed to the browser.
 You will see the Shadow-CLJS spinner when this happens. Errors will
 also be displayed in the browser and the console, just like Figwheel.
+
 
 ### CIDER/EMACS
 
@@ -112,11 +123,11 @@ Put this in your Emacs config file:
 
 Now start a `watch` build (see above), navigate to a CLJS file, and connect:
 
-To connect to older CIDER with Shadow-CLJS:
+To connect to older CIDER:
 
 1. Run `cider-connect` in emacs.
 1. Respond when prompted to enter the hostname and port.
-1. In the CIDER REPL when it is ready:
+1. In the CIDER REPL when it is ready, run this command:
 
 ```
 (shadow.cljs.devtools.api/repl :app)
