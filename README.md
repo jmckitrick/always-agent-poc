@@ -47,15 +47,16 @@ and even replacing other tools. But there are tradeoffs.
 
 ## Development
 
-Method | Additional Required Tools | Source Annotation
------- | ------------------------- | -----------------
-CLJSJS | None                      | `_CLJSJS_`
-Double Bundle | NPM, Webpack | `_DOUBLE_`
-Shadow CLJS | NPM, Shadow-CLJS | `_SHADOW_`
+Method | Additional Required Tools | Source Annotation | Development Endpoint
+------ | ------------------------- | ----------------- | --------------------
+CLJSJS | None                      | `_CLJSJS_`        | 0.0.0.0:3449
+Double Bundle | NPM, Webpack | `_DOUBLE_`              | 0.0.0.0:3449
+Shadow CLJS | NPM, Shadow-CLJS | `_SHADOW_`            | localhost:8080/shadow.html
 
 ### CLJSJS
 
 No special instructions. See below for Figwheel startup.
+
 
 ### Double Bundle
 
@@ -64,21 +65,7 @@ npm i
 npm run-script build
 ```
 
-### Shadow-CLJS
-
-Use Shadow-CLJS to build the app:
-
-```bash
-$ shadow-cljs compile
-```
-
-OR
-
-```bash
-$ shadow-cljs watch
-```
-
-### Run application in development mode (all methods):
+### Running application in Figwheel (development) mode (Methods 1 & 2):
 
 ```bash
 lein clean
@@ -89,7 +76,28 @@ Figwheel will automatically push cljs changes to the browser.
 
 Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 
+### Running application in development mode (Method 3):
+
+
+### Shadow-CLJS
+
+```bash
+$ shadow-cljs watch
+```
+
+The command above gives a HUD similar to Figwheel.
+
+Browse to http://localhost:8080/shadow.html
+
+As you edit source code, changes are automatically pushed to the browser.
+You will see the Shadow-CLJS spinner when this happens. Errors will
+also be displayed in the browser and the console, just like Figwheel.
+
 ### CIDER/EMACS
+
+CIDER will connect to Figwheel apps out of the box with `cider-jack-in-clojurescript`.
+
+Shadow-CLJS will connect as well, with just a bit more work:
 
 Put this in your Emacs config file:
 
@@ -102,14 +110,13 @@ Put this in your Emacs config file:
 
 *NB: This step may no longer be necessary with current CIDER*
 
-Now start a Figwheel REPL (see above), navigate to a CLJS file, and connect:
+Now start a `watch` build (see above), navigate to a CLJS file, and connect:
 
-`cider-jack-in-clojurescript` or (`C-c M-J`)
-
-To connect to older Shadow-CLJS:
+To connect to older CIDER with Shadow-CLJS:
 
 1. Run `cider-connect` in emacs.
-2. In the REPL when it is ready:
+1. Respond when prompted to enter the hostname and port.
+1. In the CIDER REPL when it is ready:
 
 ```
 (shadow.cljs.devtools.api/repl :app)
