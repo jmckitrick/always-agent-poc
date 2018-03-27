@@ -25,5 +25,5 @@
     :preloads [day8.re-frame-10x.preload]
     :after-load always-agent-poc.core/mount-root}
    :modules
-   {:main
+   {:main ;; app payload named main.js
     {:entries [always-agent-poc.core]}}}}}
