@@ -7,8 +7,8 @@
             [always-agent-poc.subs :as subs]
             [goog.object :as g]
             ;; _SHADOW_
-            #_["react-avatar-editor" :as react-avatar-editor]
-            #_["react-image-gallery" :as react-image-gallery]))
+            ["react-avatar-editor" :as react-avatar-editor]
+            ["react-image-gallery" :as react-image-gallery]))
 
 (defn my-data-component []
   [:div
@@ -284,10 +284,7 @@ NB: Unlike some npm components (react-image-gallery, for example)
 this component is not found under 'default' property."
   (let [;; _SHADOW_
         ;; Access the component like it is declared in the `require`.
-        ;;avatar-editor react-avatar-editor
-        ;; _DOUBLE_
-        ;; Access the component on the global object.
-        avatar-editor (g/get js/window "ReactAvatarEditor")]
+        avatar-editor react-avatar-editor]
     [:div.user-avatar-container
      {:style {:position :relative
               ;;:border "1px solid black"
@@ -358,9 +355,7 @@ For double bundle:
 NB: Some npm components (react-image-gallery, for example)
 are found under 'default' property."
   (let [;; _SHADOW_
-        ;;image-gallery react-image-gallery
-        ;; _DOUBLE_
-        image-gallery (g/get js/window "ReactImageGallery")]
+        image-gallery react-image-gallery]
     (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
     [:div
      (if @(rf/subscribe [:subs/gallery-loading?])
