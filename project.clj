@@ -7,14 +7,11 @@
                  [cljs-ajax "0.7.3"]
                  [devcards "0.2.4"]
                  [sablono "0.8.3"]
-                 [org.webjars/bootstrap "4.0.0"]
-                 ;; _CLJSJS_
-                 #_[cljsjs/react "16.2.0-3"]
-                 #_[cljsjs/react-dom "16.2.0-3"]]
+                 [org.webjars/bootstrap "4.0.0"]]
 
-  ;; _DBLBND_
-  ;; Exclude the dependencies here, but replace them
-  ;; by empty namespaces that mirror the structure.
+  ;; _DOUBLE_
+  ;; Exclude these dependencies, replacing them with
+  ;; empty namespaces that mirror the structure.
   :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]
 
   :plugins [[lein-cljsbuild "1.1.5"]
