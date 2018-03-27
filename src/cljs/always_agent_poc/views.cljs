@@ -6,9 +6,7 @@
             [always-agent-poc.events :as events]
             [always-agent-poc.subs :as subs]
             [goog.object :as g]
-            ;; This is the shadow-cljs method of npm module import.
-            ;; They are not necessary with the double bundle method.
-            ;; _SH_
+            ;; _SHADOW_
             #_["react-avatar-editor" :as react-avatar-editor]
             #_["react-image-gallery" :as react-image-gallery]))
 
@@ -284,9 +282,11 @@ For double bundle:
 [avatar-editor (g/get js/window \"ReactAvatarEditor\")]
 NB: Unlike some npm components (react-image-gallery, for example)
 this component is not found under 'default' property."
-  (let [;; _SH_
+  (let [;; _SHADOW_
+        ;; Access the component like it is declared in the `require`.
         ;;avatar-editor react-avatar-editor
-        ;; _DB_
+        ;; _DOUBLE_
+        ;; Access the component on the global object.
         avatar-editor (g/get js/window "ReactAvatarEditor")]
     [:div.user-avatar-container
      {:style {:position :relative
@@ -357,9 +357,9 @@ For double bundle:
 [image-gallery (g/get js/window \"ReactImageGallery\")]
 NB: Some npm components (react-image-gallery, for example)
 are found under 'default' property."
-  (let [;; _SH_
+  (let [;; _SHADOW_
         ;;image-gallery react-image-gallery
-        ;; _DB_
+        ;; _DOUBLE_
         image-gallery (g/get js/window "ReactImageGallery")]
     (js/console.log "Loading???" @(rf/subscribe [:subs/gallery-loading?]))
     [:div
