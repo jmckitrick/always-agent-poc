@@ -115,9 +115,33 @@
   (let [url (if (re-find #"^http" imageUrl)
               imageUrl
               (str "http://thoragency.localhost" imageUrl))]
-    [:span {:style {:margin 2}}
+    [:span.span4 {:style {:margin-left 0
+                          :width "30%"
+                          :display :block
+                          :box-sizing :border-box
+                          :float :left}}
      [:a {:href dealUrl}
-      [:img {:src url
+      [:div {:style
+             {:box-shadow "0 1px 1px rgba(0, 0, 0, 0.3)"}}
+       [:div {:style
+              {:position :relative}}
+        [:div {:style
+               {:background-image (str "url(" url ")")
+                :background-position :center
+                :background-size :cover
+                :background-repeat :no-repeat
+                :height 242}}
+         [:h4 {:style
+               {:padding "10px 10px"
+                :position :absolute
+                :left 0
+                :right 0
+                :bottom 0
+                :margin 0
+                :font-weight 300
+                :color "#4390d8"
+                :background "#f0f1f3"}}]]]]
+      #_[:img {:src url
              :width 350
              :height 350}]]]))
 
@@ -125,8 +149,11 @@
   (when (seq @(rf/subscribe [:subs/deals]))
     [:div {:style {:clear :both :margin 20}}
      [:h2 "Featured Destinations"]
-     [:h5 "Check out the following"]
-     [:div.row-fluid
+     [:h5 {:style {:color "#4390d8"}}
+      "Check out the following popular travel destinations to find great deals on a hotel!"]
+     [:div.row-fluid.destination-images
+      {:style {:width "100%"
+               :display :block}}
       (doall
        (for [deal @(rf/subscribe [:subs/deals])]
          ^{:key (:cityId deal)}
@@ -136,7 +163,7 @@
   (when (and @gallery-pic @profile-pic)
     (let [[edit? target] @edit-target]
       [:div.profile-row
-       {:style {:background (str "url(" @gallery-pic ")")
+       {:style {:background-image (str "url(" @gallery-pic ")")
                 :position :relative
                 :width "100%"
                 :height 450
@@ -419,18 +446,30 @@ are found under 'default' property."
      [button-component-3]]
     [:div
      [button-component-4]]
-    [:div
+    #_[:div
      [my-data-component]]
     [:br]]
-   [agent-component
-    (rf/subscribe [:subs/gallery])
-    (rf/subscribe [:subs/photo])
-    (rf/subscribe [:subs/edit-target])]
-   [:br]
-   [bio-component
-    @(rf/subscribe [:subs/tagline])
-    @(rf/subscribe [:subs/bio-text])]
-   [deals-component]
+   [:div {:style
+          {;:border "2px solid gray"
+           ;;:box-sizing :border-top
+           ;;:padding 2
+           ;;:margin 2
+           :display :block
+           }}
+    [:div {:style
+           {:float :left
+            :width "100%"
+            :box-sizing :border-box
+            :padding 0}}
+     [agent-component
+      (rf/subscribe [:subs/gallery])
+      (rf/subscribe [:subs/photo])
+      (rf/subscribe [:subs/edit-target])]
+     [:br]
+     [bio-component
+      @(rf/subscribe [:subs/tagline])
+      @(rf/subscribe [:subs/bio-text])]
+     [deals-component]]]
    (let [editor-atom (atom nil)]
      [:div
       [avatar-editor-ex editor-atom]
