@@ -26,4 +26,6 @@
     :after-load always-agent-poc.core/mount-root}
    :modules
    {:main ;; app payload named main.js
-    {:entries [always-agent-poc.core]}}}}}
+    {:entries [always-agent-poc.core]}}
+   :dev
+   {:closure-defines {re-frame.trace/trace-enabled? true}}}}}

@@ -419,7 +419,7 @@ are found under 'default' property."
      [button-component-3]]
     [:div
      [button-component-4]]
-    [:div
+    #_[:div
      [my-data-component]]
     [:br]]
    [agent-component
