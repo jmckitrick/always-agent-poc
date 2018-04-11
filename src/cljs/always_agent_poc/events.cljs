@@ -48,7 +48,8 @@
     :http-xhrio {:method :get
                  :uri "http://ip.jsontest.com/"
                  :timeout 8000
-                 :response-format (ajax/json-response-format {:keywords? :true})
+                 :response-format (ajax/json-response-format
+                                   {:keywords? :true})
                  :on-success [:events/good-ajax]
                  :on-failure [:events/bad-ajax]}}))
 
@@ -65,7 +66,8 @@
     :http-xhrio {:method :get
                  :uri "http://thoragency.localhost/agent/tony/alwaysAgentInfo.json"
                  :timeout 8000
-                 :response-format (ajax/json-response-format {:keywords? :true})
+                 :response-format (ajax/json-response-format
+                                   {:keywords? :true})
                  :on-success [:events/good-ajax-tst]
                  :on-failure [:events/bad-ajax]}}))
 
@@ -117,7 +119,8 @@
     :http-xhrio {:method :get
                  :uri "http://thoragency.localhost/web-services/subsite-deals"
                  :timeout 8000
-                 :response-format (ajax/json-response-format {:keywords? true})
+                 :response-format (ajax/json-response-format
+                                   {:keywords? true})
                  :on-success [:events/good-deals]
                  :on-failure [:events/bad-ajax]}}))
 
@@ -156,7 +159,8 @@
             (assoc :gallery-loading? true))
     :http-xhrio {:method :get
                  :uri "http://thoragency.localhost/admin/rest/profile/gallery"
-                 :response-format (ajax/json-response-format {:keywords? true})
+                 :response-format (ajax/json-response-format
+                                   {:keywords? true})
                  :on-success [:events/good-gallery]
                  :on-failure [:events/bad-gallery]}}))
 

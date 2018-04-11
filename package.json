@@ -7,7 +7,7 @@
     "build": "webpack -p"
   },
   "devDependencies": {
-    "shadow-cljs": "^2.2.16",
+    "shadow-cljs": "^2.2.29",
     "webpack": "3.11.0"
   },
   "dependencies": {

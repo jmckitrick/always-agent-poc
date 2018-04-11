@@ -4,6 +4,9 @@ A SPA written in ClojureScript.
 
 Uses [re-frame][1] to drive an Always-Agent configuration page.
 
+You will need `admin` and `web-services` running locally
+on the `8838-always-agent` branch.
+
 ## Design considerations
 
 There are at least 3 ways to integrate existing React components into ClojureScript:
@@ -92,7 +95,7 @@ Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 
 ```bash
 npm i
-shadow-cljs watch
+shadow-cljs watch app
 ```
 
 The command above gives a HUD similar to Figwheel.
@@ -106,7 +109,11 @@ also be displayed in the browser and the console, just like Figwheel.
 
 ### CIDER/EMACS
 
+#### Figwheel
+
 CIDER will connect to Figwheel apps out of the box with `cider-jack-in-clojurescript`.
+
+#### Shadow-CLJS
 
 Shadow-CLJS will connect as well, with just a bit more work:
 
